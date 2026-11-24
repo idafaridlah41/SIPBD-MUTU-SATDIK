@@ -71,7 +71,7 @@
         .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-        .grid-2-1 { display: grid; grid-template-columns: 2fr 1fr; gap: 20px; }
+        .grid-2-1 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .grid-2-1 { grid-template-columns: 1fr; } }
 
         /* Form Controls */
@@ -148,7 +148,7 @@
         tr:hover { background-color: #f8fafc; }
         
         /* Status Badges */
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; white-space: nowrap; }
         .badge-emerald { background-color: #d1fae5; color: #065f46; }
         .badge-amber { background-color: #fef3c7; color: #92400e; }
         .badge-rose { background-color: #ffe4e6; color: #991b1b; }
@@ -185,7 +185,7 @@
                 <div class="select-group">
                     <label for="jenjangSelect" style="margin-right: 6px;">Jenjang:</label>
                     <select id="jenjangSelect" onchange="switchJenjang(this.value)">
-                        <option value="SMP">SMP</option>
+                        <option value="SMP" selected>SMP</option>
                         <option value="PAUD">PAUD / TK / KB</option>
                         <option value="SD">SD</option>
                         <option value="SMA">SMA</option>
@@ -328,7 +328,7 @@
                     <div style="width: 40px; height: 40px; border-radius: 10px; background: #ccfbf1; color: #0f766e; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">✦</div>
                     <div>
                         <h3 style="font-size: 15px; font-weight: 700;">Unggah File Unduhan Rapor Pendidikan (.xlsx)</h3>
-                        <p style="font-size: 12px; color: #64748b;">Sistem otomatis mengekstrak skor indikator sekolah Anda dan memetakannya ke 8 SNP.</p>
+                        <p style="font-size: 12px; color: #64748b;">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>) dan memetakannya ke 8 SNP.</p>
                     </div>
                 </div>
 
@@ -472,10 +472,14 @@
 
             <div class="grid-2-1">
                 <div class="card">
-                    <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 12px;">Grafik Radar Profil Mutu Satuan Pendidikan</h3>
-                    <div style="height: 280px; position: relative;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                        <h3 style="font-size: 14px; font-weight: 700;">Grafik Radar Profil Mutu Satuan Pendidikan</h3>
+                        <span id="radarSubtitleBadge" class="badge badge-blue">Jenjang SMP</span>
+                    </div>
+                    <div style="height: 360px; position: relative;">
                         <canvas id="radarChart"></canvas>
                     </div>
+                    <div id="radarLegendDetails" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 6px;"></div>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
@@ -499,7 +503,8 @@
                         <h3 style="font-size: 15px; font-weight: 700;">Tahap 1: Identifikasi Capaian Rapor & Pemetaan 8 SNP</h3>
                         <p style="font-size: 12px; color: #64748b;">Unggah file Excel Rapor Pendidikan atau sunting langsung nilai indikator sekolah Anda pada tabel di bawah.</p>
                     </div>
-                    <div style="display:flex; gap:8px;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" onclick="cleanNonJenjangIndicators()" class="btn btn-slate" title="Hapus indikator SMK/PAUD jika jenjang adalah SMP">🧹 Bersihkan Indikator Non-Jenjang</button>
                         <button type="button" onclick="openAiUploadModal()" class="btn btn-amber">✦ Unggah Excel Rapor</button>
                         <button type="button" onclick="addNewIndicatorRow()" class="btn btn-teal">+ Tambah Indikator</button>
                     </div>
@@ -511,7 +516,7 @@
                             <tr>
                                 <th style="width: 40px; text-align: center;">No</th>
                                 <th>Kode</th>
-                                <th>Indikator Rapor</th>
+                                <th>Indikator Rapor (Kalimat Lengkap)</th>
                                 <th style="width: 220px;">Standar Nasional Pendidikan (8 SNP)</th>
                                 <th>Capaian</th>
                                 <th>Skor</th>
@@ -843,24 +848,88 @@
             "8. Standar Pembiayaan"
         ];
 
+        // Kamus Indikator Lengkap Resmi Rapor Pendidikan (Dikdasmen)
         const INDICATOR_SNP_DICTIONARY = {
-            "A.1": { name: "Kemampuan Literasi", snp: "1. Standar Kompetensi Lulusan (SKL)" },
-            "A.2": { name: "Kemampuan Numerasi", snp: "1. Standar Kompetensi Lulusan (SKL)" },
-            "A.3": { name: "Karakter", snp: "1. Standar Kompetensi Lulusan (SKL)" },
-            "C.1": { name: "Proporsi GTK Bersertifikat", snp: "5. Standar Pendidik & Tenaga Kependidikan" },
-            "C.3": { name: "Pengalaman Pelatihan GTK", snp: "5. Standar Pendidik & Tenaga Kependidikan" },
-            "D.1": { name: "Kualitas Pembelajaran", snp: "3. Standar Proses" },
-            "D.2": { name: "Refleksi dan Perbaikan Pembelajaran oleh Guru", snp: "3. Standar Proses" },
-            "D.3": { name: "Kepemimpinan Instruksional", snp: "7. Standar Pengelolaan" },
-            "D.4": { name: "Iklim Keamanan Satuan Pendidikan", snp: "6. Standar Sarana & Prasarana" },
-            "D.8": { name: "Iklim Kebinekaan", snp: "3. Standar Proses" },
-            "D.10": { name: "Iklim Inklusivitas", snp: "3. Standar Proses" },
-            "D.18": { name: "Kesiapsiagaan Bencana (SPAB)", snp: "6. Standar Sarana & Prasarana" },
-            "E.1": { name: "Partisipasi Warga Satuan Pendidikan", snp: "7. Standar Pengelolaan" },
-            "E.2": { name: "Proporsi Pemanfaatan Sumber Daya Sekolah", snp: "8. Standar Pembiayaan" },
-            "E.5": { name: "Program dan Kebijakan Satuan Pendidikan", snp: "7. Standar Pengelolaan" },
-            "E.6": { name: "Ketersediaan & Pengadaan Buku Pendidikan", snp: "6. Standar Sarana & Prasarana" }
+            "A.1": {
+                name: "Kemampuan Literasi — Persentase murid berdasarkan kemampuan dalam memahami, menggunakan, merefleksi, dan mengevaluasi beragam jenis teks (teks informasional dan teks fiksi).",
+                snp: "1. Standar Kompetensi Lulusan (SKL)"
+            },
+            "A.2": {
+                name: "Kemampuan Numerasi — Persentase murid berdasarkan kemampuan dalam berpikir menggunakan konsep, prosedur, fakta, dan alat matematika untuk menyelesaikan masalah sehari-hari.",
+                snp: "1. Standar Kompetensi Lulusan (SKL)"
+            },
+            "A.3": {
+                name: "Karakter — Nilai rerata karakter murid berdasarkan nilai Keimanan dan Ketakwaan terhadap Tuhan Yang Maha Esa, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, dan Komunikasi pada survei karakter.",
+                snp: "1. Standar Kompetensi Lulusan (SKL)"
+            },
+            "C.1": {
+                name: "Proporsi GTK Bersertifikat — Persentase guru dan kepala sekolah yang memiliki sertifikat pendidik di satuan pendidikan.",
+                snp: "5. Standar Pendidik & Tenaga Kependidikan"
+            },
+            "C.3": {
+                name: "Pengalaman Pelatihan GTK — Persentase guru yang pernah mengikuti pelatihan pengetahuan bidang studi, pedagogi, manajerial, atau pelatihan lain melalui platform/lembaga resmi.",
+                snp: "5. Standar Pendidik & Tenaga Kependidikan"
+            },
+            "D.1": {
+                name: "Kualitas Pembelajaran — Kualitas pengelolaan kelas dan penyelenggaraan pembelajaran interaktif yang sesuai dengan tujuan pembelajaran dan karakteristik murid.",
+                snp: "3. Standar Proses"
+            },
+            "D.2": {
+                name: "Refleksi dan Perbaikan Pembelajaran oleh Guru — Tingkat aktivitas refleksi dan perbaikan praktik pembelajaran yang dilakukan oleh guru secara mandiri maupun melalui komunitas belajar.",
+                snp: "3. Standar Proses"
+            },
+            "D.3": {
+                name: "Kepemimpinan Instruksional — Tingkat kepemimpinan kepala satuan pendidikan dalam menyusun dan mengomunikasikan visi-misi, pengembangan kurikulum, serta dukungan perbaikan pembelajaran.",
+                snp: "7. Standar Pengelolaan"
+            },
+            "D.4": {
+                name: "Iklim Keamanan Satuan Pendidikan — Tingkat rasa aman dan kenyamanan murid dari perundungan, hukuman fisik, kekerasan seksual, dan penyalahgunaan narkoba di lingkungan sekolah.",
+                snp: "6. Standar Sarana & Prasarana"
+            },
+            "D.8": {
+                name: "Iklim Kebinekaan — Kondisi satuan pendidikan yang menunjukkan sikap dan perilaku kepala sekolah serta guru dalam menerapkan toleransi agama dan budaya serta komitmen kebangsaan.",
+                snp: "3. Standar Proses"
+            },
+            "D.10": {
+                name: "Iklim Inklusivitas — Tingkat layanan pendidikan dan dukungan satuan pendidikan terhadap murid penyandang disabilitas serta murid cerdas istimewa bakat istimewa.",
+                snp: "3. Standar Proses"
+            },
+            "D.18": {
+                name: "Kesiapsiagaan Bencana (SPAB) — Tingkat pengetahuan, keterampilan, dan kesiapan warga satuan pendidikan serta ketersediaan fasilitas pendukung dalam menghadapi risiko bencana.",
+                snp: "6. Standar Sarana & Prasarana"
+            },
+            "E.1": {
+                name: "Partisipasi Warga Satuan Pendidikan — Tingkat keterlibatan orang tua/wali murid dan peserta didik dalam perencanaan, pengembangan, dan pelaksanaan aktivitas di satuan pendidikan.",
+                snp: "7. Standar Pengelolaan"
+            },
+            "E.2": {
+                name: "Proporsi Pemanfaatan Sumber Daya Sekolah untuk Peningkatan Mutu — Persentase pembelanjaan dana BOSP untuk pengembangan perpustakaan, kegiatan pembelajaran/ekstrakurikuler, dan peningkatan mutu GTK.",
+                snp: "8. Standar Pembiayaan"
+            },
+            "E.5": {
+                name: "Program dan Kebijakan Satuan Pendidikan — Tingkat ketersediaan dan penerapan program serta kebijakan sekolah untuk mencegah perundungan, kekerasan seksual, intoleransi, dan rokok/napza.",
+                snp: "7. Standar Pengelolaan"
+            },
+            "E.6": {
+                name: "Ketersediaan & Pengadaan Buku Pendidikan — Tingkat kecukupan buku teks utama dan buku bacaan bermutu yang tersedia bagi murid dan guru di satuan pendidikan.",
+                snp: "6. Standar Sarana & Prasarana"
+            }
         };
+
+        // Filter Kode Khusus SMK agar tidak masuk ke jenjang SMP/SD/SMA/PAUD
+        const SMK_ONLY_CODES = ["A.4", "A.5", "A.6", "A.7", "D.17"];
+
+        function isIndicatorAllowedForJenjang(code, name, jenjang) {
+            const upperCode = String(code || "").trim().toUpperCase();
+            const lowerName = String(name || "").toLowerCase();
+            if (jenjang !== "SMK") {
+                if (SMK_ONLY_CODES.includes(upperCode)) return false;
+                if (lowerName.includes("lulusan smk") || lowerName.includes("penyerapan lulusan") || lowerName.includes("pendapatan lulusan") || lowerName.includes("link and match")) {
+                    return false;
+                }
+            }
+            return true;
+        }
 
         let schoolData = {
             schoolName: "SMPN 3 Tarogong Kidul",
@@ -878,12 +947,12 @@
             supervisorRegion: "Dinas Pendidikan Kab. Garut",
             paguBosp: 150000000,
             indicators: [
-                { id: "A.1", code: "A.1", name: "Kemampuan Literasi", snp: "1. Standar Kompetensi Lulusan (SKL)", capaian: "Baik", skor: 82.20, change: 2.10, status: "Kekuatan", rankKab: "1-20%", rankNas: "21-40%" },
-                { id: "A.2", code: "A.2", name: "Kemampuan Numerasi", snp: "1. Standar Kompetensi Lulusan (SKL)", capaian: "Sedang", skor: 65.40, change: -1.20, status: "Perhatian", rankKab: "21-40%", rankNas: "41-60%" },
-                { id: "A.3", code: "A.3", name: "Karakter Murid", snp: "1. Standar Kompetensi Lulusan (SKL)", capaian: "Sedang", skor: 52.10, change: -2.30, status: "Prioritas Utama", rankKab: "41-60%", rankNas: "41-60%" },
-                { id: "D.1", code: "D.1", name: "Kualitas Pembelajaran", snp: "3. Standar Proses", capaian: "Sedang", skor: 58.90, change: -4.50, status: "Prioritas Utama", rankKab: "41-60%", rankNas: "41-60%" },
-                { id: "D.18", code: "D.18", name: "Kesiapsiagaan Bencana (SPAB)", snp: "6. Standar Sarana & Prasarana", capaian: "Kurang", skor: 48.50, change: -4.20, status: "Prioritas Utama", rankKab: "61-80%", rankNas: "61-80%" },
-                { id: "E.6", code: "E.6", name: "Ketersediaan & Pengadaan Buku Pendidikan", snp: "6. Standar Sarana & Prasarana", capaian: "Sedang", skor: 58.00, change: -1.50, status: "Perhatian", rankKab: "41-60%", rankNas: "41-60%" }
+                { id: "A.1", code: "A.1", name: INDICATOR_SNP_DICTIONARY["A.1"].name, snp: "1. Standar Kompetensi Lulusan (SKL)", capaian: "Baik", skor: 82.20, change: 2.10, status: "Kekuatan", rankKab: "1-20%", rankNas: "21-40%" },
+                { id: "A.2", code: "A.2", name: INDICATOR_SNP_DICTIONARY["A.2"].name, snp: "1. Standar Kompetensi Lulusan (SKL)", capaian: "Sedang", skor: 65.40, change: -1.20, status: "Perhatian", rankKab: "21-40%", rankNas: "41-60%" },
+                { id: "A.3", code: "A.3", name: INDICATOR_SNP_DICTIONARY["A.3"].name, snp: "1. Standar Kompetensi Lulusan (SKL)", capaian: "Sedang", skor: 52.10, change: -2.30, status: "Prioritas Utama", rankKab: "41-60%", rankNas: "41-60%" },
+                { id: "D.1", code: "D.1", name: INDICATOR_SNP_DICTIONARY["D.1"].name, snp: "3. Standar Proses", capaian: "Sedang", skor: 58.90, change: -4.50, status: "Prioritas Utama", rankKab: "41-60%", rankNas: "41-60%" },
+                { id: "D.18", code: "D.18", name: INDICATOR_SNP_DICTIONARY["D.18"].name, snp: "6. Standar Sarana & Prasarana", capaian: "Kurang", skor: 48.50, change: -4.20, status: "Prioritas Utama", rankKab: "61-80%", rankNas: "61-80%" },
+                { id: "E.6", code: "E.6", name: INDICATOR_SNP_DICTIONARY["E.6"].name, snp: "6. Standar Sarana & Prasarana", capaian: "Sedang", skor: 58.00, change: -1.50, status: "Perhatian", rankKab: "41-60%", rankNas: "41-60%" }
             ],
             reflections: [],
             rkt: [],
@@ -908,7 +977,16 @@
                 const raw = localStorage.getItem(LS_KEY);
                 if (raw) {
                     const parsed = JSON.parse(raw);
-                    if (parsed && parsed.schoolName) schoolData = { ...schoolData, ...parsed };
+                    if (parsed && parsed.schoolName) {
+                        schoolData = { ...schoolData, ...parsed };
+                        // Bersihkan otomatis jika sebelumnya sempat tersedot URL atau indikator SMK
+                        if (String(schoolData.schoolName).startsWith("http")) {
+                            schoolData.schoolName = "SMPN 3 Tarogong Kidul";
+                        }
+                        schoolData.indicators = (schoolData.indicators || []).filter(ind =>
+                            isIndicatorAllowedForJenjang(ind.code, ind.name, schoolData.jenjang || "SMP")
+                        );
+                    }
                 }
             } catch (e) {}
         }
@@ -918,6 +996,25 @@
             document.getElementById('syncToastText').textContent = msg;
             t.style.display = 'block';
             setTimeout(() => t.style.display = 'none', 3500);
+        }
+
+        function cleanNonJenjangIndicators() {
+            const jenjang = schoolData.jenjang || "SMP";
+            const beforeCount = schoolData.indicators.length;
+            schoolData.indicators = schoolData.indicators.filter(ind => {
+                if (!isIndicatorAllowedForJenjang(ind.code, ind.name, jenjang)) return false;
+                // Lengkapi kalimat deskripsi jika masih singkat dan tersedia di kamus
+                if (INDICATOR_SNP_DICTIONARY[ind.code] && ind.name.length < 40) {
+                    ind.name = INDICATOR_SNP_DICTIONARY[ind.code].name;
+                }
+                return true;
+            });
+            const removed = beforeCount - schoolData.indicators.length;
+            persist();
+            syncAllUI();
+            showToast(removed > 0
+                ? `${removed} indikator di luar jenjang ${jenjang} berhasil dihapus & kalimat dilengkapi!`
+                : `Seluruh indikator sudah sesuai jenjang ${jenjang} dengan kalimat lengkap!`);
         }
 
         function handlePrintDocument() {
@@ -949,7 +1046,7 @@
             const numObj = schoolData.indicators.find(i => i.code === 'A.2');
             const litStr = litObj ? `${litObj.skor} (${litObj.capaian})` : '-';
             const numStr = numObj ? `${numObj.skor} (${numObj.capaian})` : '-';
-            const prioList = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => `${i.code} ${i.name}`).slice(0, 3).join(', ') || 'Terpenuhi';
+            const prioList = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => `${i.code} ${i.name.split('—')[0].trim()}`).slice(0, 3).join(', ') || 'Terpenuhi';
             const totArkas = (schoolData.arkas || []).reduce((acc, a) => acc + ((parseFloat(a.vol) || 0) * (parseFloat(a.price) || 0)), 0);
 
             return [
@@ -992,7 +1089,6 @@
             return { blob, fileName, jsonString };
         }
 
-        // Metode 1: Web Share API (Melampirkan file .json langsung di HP/Tablet Android/iOS)
         async function shareFileNativeAndroid() {
             const { blob, fileName } = createSchoolJsonBlob();
             const messageText = document.getElementById('waMessagePreview').value.trim() || buildSummaryMessage(fileName);
@@ -1017,7 +1113,6 @@
             }
         }
 
-        // Metode 2A: Unduh file .json saja tanpa pindah aplikasi agar tidak diblokir browser
         function downloadJsonOnlyInModal() {
             const { blob, fileName } = createSchoolJsonBlob();
             const url = URL.createObjectURL(blob);
@@ -1039,7 +1134,6 @@
             showToast(`File ${fileName} diunduh! Sekarang klik tombol '2️⃣ Buka WhatsApp →'.`);
         }
 
-        // Metode 2B: Buka chat WhatsApp ke nomor pengawas
         function openWhatsappChatOnly() {
             const rawPhone = document.getElementById('waTargetInput').value.trim();
             const formattedPhone = formatWaNumber(rawPhone);
@@ -1104,6 +1198,9 @@
                             throw new Error("Format file JSON tidak dikenali.");
                         }
                     }
+                    schoolData.indicators = (schoolData.indicators || []).filter(ind =>
+                        isIndicatorAllowedForJenjang(ind.code, ind.name, schoolData.jenjang || "SMP")
+                    );
                     persist();
                     syncAllUI();
                     showToast(`Data ${schoolData.schoolName} berhasil dimuat!`);
@@ -1152,8 +1249,12 @@
 
         function switchJenjang(val) {
             schoolData.jenjang = val;
+            schoolData.indicators = (schoolData.indicators || []).filter(ind =>
+                isIndicatorAllowedForJenjang(ind.code, ind.name, val)
+            );
             persist();
             syncAllUI();
+            showToast(`Jenjang diubah ke ${val}. Indikator disesuaikan otomatis.`);
         }
 
         function updateBospPagu(val) {
@@ -1197,13 +1298,40 @@
         }
 
         /* ----------------------------------------------------
+           HELPER PEMBUNGKUS KALIMAT LENGKAP UNTUK RADAR
+        ---------------------------------------------------- */
+        function wrapRadarLabel(fullText, maxCharsPerLine = 32) {
+            const words = String(fullText || "").split(/\s+/);
+            const lines = [];
+            let currentLine = "";
+
+            words.forEach(word => {
+                if ((currentLine + " " + word).trim().length <= maxCharsPerLine) {
+                    currentLine = (currentLine + " " + word).trim();
+                } else {
+                    if (currentLine) lines.push(currentLine);
+                    currentLine = word;
+                }
+            });
+            if (currentLine) lines.push(currentLine);
+            return lines;
+        }
+
+        /* ----------------------------------------------------
            RENDERERS
         ---------------------------------------------------- */
         function renderDashboard() {
-            const inds = schoolData.indicators || [];
+            const jenjang = schoolData.jenjang || "SMP";
+            const inds = (schoolData.indicators || []).filter(ind =>
+                isIndicatorAllowedForJenjang(ind.code, ind.name, jenjang)
+            );
+
             document.getElementById('statBaik').textContent = `${inds.filter(i => i.capaian === 'Baik').length} Indikator`;
             document.getElementById('statSedang').textContent = `${inds.filter(i => i.capaian === 'Sedang').length} Indikator`;
             document.getElementById('statKurang').textContent = `${inds.filter(i => i.capaian !== 'Baik').length} Indikator`;
+
+            const badgeSub = document.getElementById('radarSubtitleBadge');
+            if (badgeSub) badgeSub.textContent = `${schoolData.schoolName} (${jenjang})`;
 
             const totArkas = (schoolData.arkas || []).reduce((acc, a) => acc + ((parseFloat(a.vol) || 0) * (parseFloat(a.price) || 0)), 0);
             document.getElementById('statTotalArkasDash').textContent = `Rp ${totArkas.toLocaleString('id-ID')}`;
@@ -1241,16 +1369,16 @@
             // Priority List
             const prioContainer = document.getElementById('priorityListDashboard');
             prioContainer.innerHTML = '';
-            const prioList = inds.filter(i => i.capaian !== 'Baik').slice(0, 4);
+            const prioList = inds.filter(i => i.capaian !== 'Baik').slice(0, 5);
             if (!prioList.length) {
                 prioContainer.innerHTML = '<div style="font-size:12px; color:#64748b;">Seluruh indikator sudah dalam kategori Baik.</div>';
             } else {
                 prioList.forEach(p => {
                     prioContainer.innerHTML += `
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:center;">
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
                             <div>
-                                <div style="font-weight:700; font-size:12px;">${esc(p.code)} - ${esc(p.name)}</div>
-                                <div style="font-size:10px; color:#64748b;">${esc(p.snp)}</div>
+                                <div style="font-weight:700; font-size:12px; line-height:1.4; color:#0f172a;">${esc(p.code)} - ${esc(p.name)}</div>
+                                <div style="font-size:10px; color:#64748b; margin-top:4px;">${esc(p.snp)}</div>
                             </div>
                             <span class="badge ${p.capaian === 'Kurang' ? 'badge-rose' : 'badge-amber'}">${esc(p.capaian)} (${p.skor})</span>
                         </div>
@@ -1258,17 +1386,28 @@
                 });
             }
 
-            // Radar Chart
+            // Radar Chart (Kalimat Lengkap & Rapi)
+            const radarSlice = inds.slice(0, 6);
+            const legendBox = document.getElementById('radarLegendDetails');
+            if (legendBox) {
+                legendBox.innerHTML = `<div style="font-size:11px; font-weight:700; color:#475569; margin-bottom:2px;">Keterangan Kalimat Lengkap Indikator pada Grafik Radar:</div>` +
+                    radarSlice.map(i => `
+                        <div style="font-size:11px; color:#334155; line-height:1.4; background:#f8fafc; padding:6px 8px; border-radius:6px; border-left:3px solid #0d9488;">
+                            <strong style="color:#0f766e;">${esc(i.code)}</strong>: ${esc(i.name)} <span style="font-weight:700; color:#0f172a;">(Skor: ${i.skor})</span>
+                        </div>
+                    `).join('');
+            }
+
             const ctx = document.getElementById('radarChart');
             if (!ctx || typeof Chart === 'undefined') return;
             if (radarChartInstance) radarChartInstance.destroy();
             radarChartInstance = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: inds.slice(0, 6).map(i => i.code + ' ' + i.name.substring(0, 14)),
+                    labels: radarSlice.map(i => wrapRadarLabel(`${i.code} ${i.name}`, 34)),
                     datasets: [{
                         label: `Capaian ${schoolData.schoolName}`,
-                        data: inds.slice(0, 6).map(i => i.skor),
+                        data: radarSlice.map(i => i.skor),
                         backgroundColor: 'rgba(13, 148, 136, 0.2)',
                         borderColor: '#0d9488',
                         pointBackgroundColor: '#0d9488'
@@ -1277,7 +1416,28 @@
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
-                    scales: { r: { min: 0, max: 100, ticks: { stepSize: 20, display: false } } }
+                    plugins: {
+                        tooltip: {
+                            callbacks: {
+                                title: function(items) {
+                                    const idx = items[0].dataIndex;
+                                    const item = radarSlice[idx];
+                                    return item ? `${item.code} - ${item.name}` : '';
+                                }
+                            }
+                        }
+                    },
+                    scales: {
+                        r: {
+                            min: 0,
+                            max: 100,
+                            ticks: { stepSize: 20, display: false },
+                            pointLabels: {
+                                font: { size: 10, weight: '600' },
+                                color: '#1e293b'
+                            }
+                        }
+                    }
                 }
             });
         }
@@ -1329,7 +1489,7 @@
                 tr.innerHTML = `
                     <td>
                         <select class="form-control" style="font-size:11px;" onchange="setField('reflections',${idx},'indicator',this.value)">
-                            ${schoolData.indicators.map(i => `<option value="${i.code} ${i.name}" ${ref.indicator.includes(i.code) ? 'selected' : ''}>${i.code} - ${i.name}</option>`).join('')}
+                            ${schoolData.indicators.map(i => `<option value="${i.code} ${i.name}" ${ref.indicator.includes(i.code) ? 'selected' : ''}>${i.code} - ${i.name.split('—')[0].trim()}</option>`).join('')}
                         </select>
                     </td>
                     ${ce('reflections', idx, 'fact', ref.fact)}
@@ -1354,13 +1514,16 @@
         }
 
         function autoGenerateAIReflections() {
-            schoolData.reflections = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => ({
-                indicator: `${i.code} ${i.name}`,
-                fact: `Skor ${i.skor} (${i.capaian}) pada Rapor Pendidikan ${schoolData.schoolName}.`,
-                subIndicator: `${i.code}.1 Penguatan Kompetensi ${i.name}`,
-                cause: `Penerapan metode pembelajaran interaktif dan pemanfaatan media pendukung pada aspek ${i.name} belum merata di semua kelas.`,
-                evidence: `Dokumen Perangkat Ajar, Jurnal Guru, dan Hasil Asesmen Formatif.`
-            }));
+            schoolData.reflections = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => {
+                const shortTitle = i.name.split('—')[0].trim();
+                return {
+                    indicator: `${i.code} ${i.name}`,
+                    fact: `Skor ${i.skor} (${i.capaian}) pada Rapor Pendidikan ${schoolData.schoolName}.`,
+                    subIndicator: `${i.code}.1 Penguatan Kompetensi ${shortTitle}`,
+                    cause: `Penerapan metode pembelajaran interaktif dan pemanfaatan media pendukung pada aspek ${shortTitle} belum merata di semua kelas.`,
+                    evidence: `Dokumen Perangkat Ajar, Jurnal Guru, dan Hasil Asesmen Formatif.`
+                };
+            });
             persist();
             renderReflectionsTable();
             showToast("Draf Refleksi Berhasil Disusun!");
@@ -1523,8 +1686,8 @@
             document.getElementById('repKepsekPrint').textContent = schoolData.kepsekName || "( ________________________ )";
             document.getElementById('repKepsekNipPrint').textContent = schoolData.kepsekNIP ? `NIP. ${schoolData.kepsekNIP}` : "NIP. ........................................";
 
-            const kuat = schoolData.indicators.filter(i => i.capaian === 'Baik').map(i => i.name).join(', ') || 'indikator standar';
-            const benahi = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => i.name).join(', ') || 'peningkatan berkelanjutan';
+            const kuat = schoolData.indicators.filter(i => i.capaian === 'Baik').map(i => i.name.split('—')[0].trim()).join(', ') || 'indikator standar';
+            const benahi = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => i.name.split('—')[0].trim()).join(', ') || 'peningkatan berkelanjutan';
 
             document.getElementById('repExecSummary').innerHTML = `
                 Dokumen Evaluasi Diri Satuan Pendidikan (EDS) dan Perencanaan Berbasis Data (PBD) <strong>${esc(schoolData.schoolName)}</strong> 
@@ -1619,7 +1782,7 @@
                 </div>
             `).join('') : '<div style="color:#059669; font-weight:600;">✓ Kondisi standar ini baik / belum ada catatan masalah.</div>';
 
-            const rkts = schoolData.rkt.filter(r => inds.some(i => r.program.toLowerCase().includes(i.name.toLowerCase()) || r.kegiatan.toLowerCase().includes(i.name.toLowerCase())));
+            const rkts = schoolData.rkt.filter(r => inds.some(i => r.program.toLowerCase().includes(i.name.split('—')[0].trim().toLowerCase()) || r.kegiatan.toLowerCase().includes(i.name.split('—')[0].trim().toLowerCase())));
             document.getElementById('snpModalRktBody').innerHTML = rkts.length ? rkts.map(r => `
                 <tr>
                     <td style="font-weight:700;">${esc(r.program)}</td>
@@ -1632,7 +1795,11 @@
         }
 
         function closeSnpDetailModal() { document.getElementById('snpDetailModal').classList.remove('open'); }
-        function openAiUploadModal() { document.getElementById('aiUploadModal').classList.add('open'); }
+        function openAiUploadModal() {
+            const lbl = document.getElementById('modalJenjangLabel');
+            if (lbl) lbl.textContent = schoolData.jenjang || 'SMP';
+            document.getElementById('aiUploadModal').classList.add('open');
+        }
         function closeAiUploadModal() { document.getElementById('aiUploadModal').classList.remove('open'); }
 
         function handleFileSelect(event) {
@@ -1648,6 +1815,7 @@
         function processRaporWithAI() {
             if (!selectedFileRaw) return;
             document.getElementById('aiProcessingState').style.display = 'block';
+            const currentJenjang = schoolData.jenjang || "SMP";
 
             const reader = new FileReader();
             reader.onload = function(e) {
@@ -1666,9 +1834,10 @@
                             if (npsnMatch) schoolData.npsn = npsnMatch[0];
 
                             for (let c = 0; c < row.length - 1; c++) {
-                                const lbl = String(row[c]).toLowerCase();
-                                if ((lbl.includes("nama sekolah") || lbl.includes("satuan pendidikan")) && String(row[c+1]).trim().length > 3) {
-                                    schoolData.schoolName = String(row[c+1]).trim();
+                                const lbl = String(row[c]).trim().toLowerCase();
+                                const nextVal = String(row[c+1]).trim();
+                                if ((lbl === "nama sekolah" || lbl === "nama satuan pendidikan") && nextVal.length > 3 && !nextVal.startsWith("http")) {
+                                    schoolData.schoolName = nextVal;
                                 }
                             }
 
@@ -1678,7 +1847,7 @@
                                     let indName = "", skorVal = null, capaianVal = "", changeVal = 0;
                                     for (let k = c + 1; k < Math.min(row.length, c + 8); k++) {
                                         const valStr = String(row[k]).trim();
-                                        if (!valStr) continue;
+                                        if (!valStr || valStr.startsWith("http")) continue;
                                         if (!indName && valStr.length > 4 && isNaN(parseFloat(valStr))) indName = valStr;
                                         else if (skorVal === null && !isNaN(parseFloat(valStr.replace(',', '.')))) {
                                             const num = parseFloat(valStr.replace(',', '.'));
@@ -1691,12 +1860,19 @@
                                         }
                                     }
 
+                                    // Filter sesuai jenjang (abaikan A.4 - A.7 SMK jika jenjang SMP)
+                                    if (!isIndicatorAllowedForJenjang(cellCode, indName, currentJenjang)) {
+                                        continue;
+                                    }
+
                                     const dict = INDICATOR_SNP_DICTIONARY[cellCode] || { name: indName || `Indikator ${cellCode}`, snp: STANDAR_NASIONAL_PENDIDIKAN[0] };
+                                    // Gunakan kalimat lengkap dari kamus jika tersedia, atau gabungkan dengan teks Excel
+                                    const fullDisplayName = dict.name || indName;
                                     const finalSkor = skorVal !== null ? skorVal : 65.0;
                                     const finalCap = capaianVal || (finalSkor >= 70 ? "Baik" : (finalSkor >= 50 ? "Sedang" : "Kurang"));
 
                                     extractedMap.set(cellCode, {
-                                        id: cellCode, code: cellCode, name: indName || dict.name, snp: dict.snp,
+                                        id: cellCode, code: cellCode, name: fullDisplayName, snp: dict.snp,
                                         capaian: finalCap, skor: finalSkor, change: changeVal,
                                         status: finalCap === "Kurang" ? "Prioritas Utama" : (finalCap === "Sedang" ? "Perhatian" : "Kekuatan"),
                                         rankKab: finalCap === "Baik" ? "1-20%" : "41-60%", rankNas: finalCap === "Baik" ? "21-40%" : "41-60%"
@@ -1718,7 +1894,7 @@
                     document.getElementById('aiProcessingState').style.display = 'none';
                     closeAiUploadModal();
                     syncAllUI();
-                    showToast(`Berhasil membaca ${schoolData.indicators.length} indikator Rapor Pendidikan!`);
+                    showToast(`Berhasil membaca ${schoolData.indicators.length} indikator jenjang ${currentJenjang}!`);
                 } catch (err) {
                     alert("Gagal memproses file Excel: " + err.message);
                     document.getElementById('aiProcessingState').style.display = 'none';
