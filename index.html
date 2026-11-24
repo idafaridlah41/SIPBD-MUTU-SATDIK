@@ -12,8 +12,18 @@
     <style>
         @import url('https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap');
         
+        :root {
+            --ui-scale: 1;
+        }
+        html.font-large {
+            --ui-scale: 1.18;
+        }
+        html.font-xlarge {
+            --ui-scale: 1.32;
+        }
+
         * { box-sizing: border-box; margin: 0; padding: 0; font-family: 'Inter', -apple-system, sans-serif; }
-        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; font-size: 14px; }
+        body { background-color: #f8fafc; color: #1e293b; min-height: 100vh; display: flex; flex-direction: column; font-size: calc(14px * var(--ui-scale)); line-height: 1.45; }
         
         html { color-scheme: light; } 
         body { padding-bottom: env(safe-area-inset-bottom, 0px); }
@@ -25,15 +35,22 @@
         header { background: linear-gradient(135deg, #0f172a 0%, #115e59 100%); color: white; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 40; }
         .header-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
         .brand { display: flex; align-items: center; gap: 12px; }
-        .brand-icon { background-color: #2dd4bf; color: #0f172a; width: 40px; height: 40px; border-radius: 8px; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; }
-        .brand-text h1 { font-size: 16px; font-weight: 700; line-height: 1.2; letter-spacing: 0.5px; }
-        .brand-text p { font-size: 11px; color: #cbd5e1; }
+        .brand-icon { background-color: #2dd4bf; color: #0f172a; width: 40px; height: 40px; border-radius: 8px; font-weight: 800; font-size: 18px; display: flex; align-items: center; justify-content: center; flex-shrink: 0; }
+        .brand-text h1 { font-size: calc(16px * var(--ui-scale)); font-weight: 700; line-height: 1.2; letter-spacing: 0.5px; }
+        .brand-text p { font-size: calc(11px * var(--ui-scale)); color: #cbd5e1; }
         
         .header-actions { display: flex; align-items: center; gap: 10px; flex-wrap: wrap; }
-        .select-group { display: flex; align-items: center; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 6px; font-size: 12px; color: #e2e8f0; }
-        .select-group select { background: #0f172a; color: white; border: 1px solid #475569; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: 600; outline: none; }
+        .select-group { display: flex; align-items: center; background-color: rgba(15, 23, 42, 0.6); border: 1px solid rgba(255, 255, 255, 0.2); padding: 4px 10px; border-radius: 6px; font-size: calc(12px * var(--ui-scale)); color: #e2e8f0; }
+        .select-group select { background: #0f172a; color: white; border: 1px solid #475569; border-radius: 4px; padding: 4px 8px; font-size: calc(11px * var(--ui-scale)); font-weight: 600; outline: none; }
+
+        /* Font Accessibility Switcher */
+        .font-switcher { display: inline-flex; align-items: center; background-color: rgba(15, 23, 42, 0.7); border: 1px solid rgba(255, 255, 255, 0.25); border-radius: 6px; padding: 2px; gap: 2px; }
+        .font-switcher-label { font-size: 11px; color: #2dd4bf; font-weight: 700; padding: 0 6px; white-space: nowrap; }
+        .font-btn { background: transparent; color: #e2e8f0; border: none; border-radius: 4px; padding: 4px 8px; font-size: 11px; font-weight: 700; cursor: pointer; transition: all 0.15s; }
+        .font-btn:hover { background: rgba(255,255,255,0.15); color: #fff; }
+        .font-btn.active { background: #2dd4bf; color: #0f172a; }
         
-        .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; position: relative; }
+        .btn { padding: 6px 14px; border-radius: 6px; font-size: calc(12px * var(--ui-scale)); font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; position: relative; }
         .btn-teal { background-color: #0d9488; color: white; }
         .btn-teal:hover { background-color: #0f766e; }
         .btn-wa { background-color: #16a34a; color: white; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3); }
@@ -48,7 +65,7 @@
         .btn-slate:hover { background-color: #cbd5e1; }
         .btn-rose { background-color: #e11d48; color: white; }
         .btn-rose:hover { background-color: #be123c; }
-        .btn-sm { padding: 4px 8px; font-size: 11px; }
+        .btn-sm { padding: 4px 8px; font-size: calc(11px * var(--ui-scale)); }
 
         /* Direct File Input Overlay */
         .file-btn-wrapper { position: relative; overflow: hidden; display: inline-flex; align-items: center; }
@@ -75,8 +92,8 @@
         @media (max-width: 900px) { .grid-2-1 { grid-template-columns: 1fr; } }
 
         /* Form Controls */
-        .form-group label { display: block; font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase; margin-bottom: 4px; }
-        .form-control { width: 100%; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: 13px; font-weight: 600; color: #1e293b; }
+        .form-group label { display: block; font-size: calc(11px * var(--ui-scale)); font-weight: 700; color: #475569; text-transform: uppercase; margin-bottom: 4px; }
+        .form-control { width: 100%; background-color: #f8fafc; border: 1px solid #cbd5e1; border-radius: 6px; padding: 8px 12px; font-size: calc(13px * var(--ui-scale)); font-weight: 600; color: #1e293b; }
         .form-control:focus { outline: none; border-color: #0d9488; background-color: white; }
         
         /* Navigation Tabs — 2 Baris Rapi (3x2 Grid) */
@@ -99,9 +116,9 @@
             border: 1px solid #e2e8f0;
             border-radius: 8px;
             padding: 10px 14px;
-            font-size: 12px;
+            font-size: calc(12px * var(--ui-scale));
             font-weight: 600;
-            color: #475569;
+            color: #334155;
             cursor: pointer;
             display: flex;
             align-items: center;
@@ -109,7 +126,7 @@
             text-align: center;
             gap: 8px;
             transition: all 0.2s;
-            line-height: 1.3;
+            line-height: 1.35;
         }
         .tab-btn:hover {
             background-color: #f0fdfa;
@@ -127,44 +144,63 @@
 
         /* Stats Card */
         .stat-card { background: white; border: 1px solid #e2e8f0; border-radius: 10px; padding: 16px; display: flex; justify-content: space-between; align-items: center; }
-        .stat-title { font-size: 11px; font-weight: 700; color: #94a3b8; text-transform: uppercase; }
-        .stat-value { font-size: 22px; font-weight: 800; margin-top: 4px; }
-        .stat-sub { font-size: 11px; color: #64748b; margin-top: 2px; }
-        .stat-icon { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; }
+        .stat-title { font-size: calc(11px * var(--ui-scale)); font-weight: 700; color: #64748b; text-transform: uppercase; }
+        .stat-value { font-size: calc(22px * var(--ui-scale)); font-weight: 800; margin-top: 4px; }
+        .stat-sub { font-size: calc(11px * var(--ui-scale)); color: #475569; margin-top: 2px; }
+        .stat-icon { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
 
         /* 8 SNP Grid Items */
-        .snp-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #f8fafc; font-size: 12px; cursor: pointer; transition: all 0.2s; position: relative; }
+        .snp-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #f8fafc; font-size: calc(12px * var(--ui-scale)); cursor: pointer; transition: all 0.2s; position: relative; }
         .snp-card:hover { transform: translateY(-2px); box-shadow: 0 4px 6px -1px rgba(0,0,0,0.08); }
         .snp-card.baik { background-color: #ecfdf5; border-color: #a7f3d0; color: #065f46; }
         .snp-card.sedang { background-color: #fffbeb; border-color: #fde68a; color: #92400e; }
         .snp-card.kurang { background-color: #fef2f2; border-color: #fecaca; color: #991b1b; }
-        .snp-badge { display: inline-block; font-size: 10px; font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.9); }
+        .snp-badge { display: inline-block; font-size: calc(10px * var(--ui-scale)); font-weight: 700; padding: 2px 6px; border-radius: 4px; background: rgba(255,255,255,0.9); }
 
         /* Tables */
         .table-responsive { width: 100%; overflow-x: auto; }
-        table { width: 100%; border-collapse: collapse; font-size: 12px; text-align: left; }
-        th { background-color: #f1f5f9; color: #475569; font-weight: 700; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
-        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; }
+        table { width: 100%; border-collapse: collapse; font-size: calc(12px * var(--ui-scale)); text-align: left; }
+        th { background-color: #f1f5f9; color: #334155; font-weight: 700; text-transform: uppercase; padding: 10px 12px; border-bottom: 1px solid #e2e8f0; white-space: nowrap; }
+        td { padding: 10px 12px; border-bottom: 1px solid #f1f5f9; vertical-align: middle; line-height: 1.45; }
         tr:hover { background-color: #f8fafc; }
         
         /* Status Badges */
-        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: 10px; font-weight: 700; white-space: nowrap; }
+        .badge { display: inline-block; padding: 3px 8px; border-radius: 12px; font-size: calc(10px * var(--ui-scale)); font-weight: 700; white-space: nowrap; }
         .badge-emerald { background-color: #d1fae5; color: #065f46; }
         .badge-amber { background-color: #fef3c7; color: #92400e; }
         .badge-rose { background-color: #ffe4e6; color: #991b1b; }
         .badge-blue { background-color: #dbeafe; color: #1e40af; }
 
+        /* Section Titles & Helpers */
+        .section-heading { font-size: calc(15px * var(--ui-scale)); font-weight: 700; color: #1e293b; }
+        .section-subtext { font-size: calc(12px * var(--ui-scale)); color: #475569; }
+        .prio-item-card { background: #f8fafc; border: 1px solid #e2e8f0; padding: 10px 12px; border-radius: 8px; display: flex; flex-direction: column; gap: 6px; }
+        .prio-item-snp { font-size: calc(10px * var(--ui-scale)); font-weight: 700; color: #0f766e; }
+        .prio-item-desc { font-weight: 600; font-size: calc(12px * var(--ui-scale)); line-height: 1.5; color: #0f172a; }
+
         /* Modals */
         .modal-overlay { position: fixed; inset: 0; background-color: rgba(15, 23, 42, 0.6); backdrop-filter: blur(4px); z-index: 50; display: none; align-items: center; justify-content: center; padding: 16px; }
         .modal-overlay.open { display: flex !important; }
-        .modal-body { background: white; border-radius: 16px; max-width: 750px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; }
-        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 18px; color: #94a3b8; cursor: pointer; }
+        .modal-body { background: white; border-radius: 16px; max-width: 750px; width: 100%; max-height: 85vh; overflow-y: auto; padding: 24px; box-shadow: 0 20px 25px -5px rgba(0,0,0,0.1); position: relative; font-size: calc(13px * var(--ui-scale)); }
+        .modal-close { position: absolute; top: 16px; right: 16px; background: none; border: none; font-size: 18px; color: #64748b; cursor: pointer; }
 
-        /* Print Settings */
+        /* Print Settings — MENGUNCI TAMPILAN CETAK & PREVIEW AGAR TETAP MENGIKUTI ACUAN STANDAR */
         @media print {
+            :root, html.font-large, html.font-xlarge {
+                --ui-scale: 1 !important;
+            }
             .no-print { display: none !important; }
-            body { background: white; color: black; }
-            .card { border: none; box-shadow: none; padding: 0; }
+            body { background: white !important; color: black !important; font-size: 12px !important; line-height: 1.4 !important; }
+            .main-container { margin: 0 !important; padding: 0 !important; max-width: 100% !important; }
+            .card { border: none !important; box-shadow: none !important; padding: 0 !important; margin: 0 !important; }
+            #docEdsContainer, #docRktContainer, #docRkasContainer { padding: 10px 16px !important; max-width: 100% !important; }
+            #docEdsContainer h2, #docRktContainer h2, #docRkasContainer h2 { font-size: 17px !important; }
+            #docEdsContainer h3, #docRktContainer h3, #docRkasContainer h3 { font-size: 14px !important; }
+            #docEdsContainer h4, #docRktContainer h4, #docRkasContainer h4 { font-size: 12px !important; }
+            #docEdsContainer p, #docRktContainer p, #docRkasContainer p { font-size: 11px !important; line-height: 1.5 !important; }
+            table { font-size: 11px !important; }
+            th, td { padding: 6px 8px !important; font-size: 11px !important; line-height: 1.35 !important; }
+            .badge { font-size: 10px !important; padding: 2px 6px !important; }
         }
     </style>
 </head>
@@ -182,6 +218,14 @@
             </div>
             
             <div class="header-actions">
+                <!-- PENGATUR UKURAN TULISAN LAYAR (RAMAH USIA 50+) -->
+                <div class="font-switcher" title="Sesuaikan ukuran tulisan di layar agar lebih nyaman dibaca (tidak mengubah format cetak)">
+                    <span class="font-switcher-label">👁️ Teks:</span>
+                    <button type="button" id="fontBtn-normal" class="font-btn active" onclick="setUiFontScale('normal')">Normal</button>
+                    <button type="button" id="fontBtn-large" class="font-btn" onclick="setUiFontScale('large')">Besar (50+)</button>
+                    <button type="button" id="fontBtn-xlarge" class="font-btn" onclick="setUiFontScale('xlarge')">Ekstra</button>
+                </div>
+
                 <div class="select-group">
                     <label for="jenjangSelect" style="margin-right: 6px;">Jenjang:</label>
                     <select id="jenjangSelect" onchange="switchJenjang(this.value)">
@@ -217,7 +261,7 @@
     <div class="main-container">
         
         <!-- FLOATING NOTIFICATION TOAST -->
-        <div id="syncToast" style="display:none; position:fixed; bottom:20px; right:20px; z-index:999; background:#0f172a; color:white; border-left:4px solid #14b8a6; padding:12px 20px; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); font-size:13px; font-weight:600;">
+        <div id="syncToast" style="display:none; position:fixed; bottom:20px; right:20px; z-index:999; background:#0f172a; color:white; border-left:4px solid #14b8a6; padding:12px 20px; border-radius:8px; box-shadow:0 10px 15px -3px rgba(0,0,0,0.3); font-size:calc(13px * var(--ui-scale)); font-weight:600;">
             <span style="color:#2dd4bf; margin-right:6px;">✓</span> <span id="syncToastText">Data Tersimpan!</span>
         </div>
 
@@ -276,30 +320,30 @@
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                     <div style="width: 44px; height: 44px; border-radius: 12px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold;">💬</div>
                     <div>
-                        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a;">Kirim Data Sekolah ke WhatsApp Pengawas</h3>
-                        <p style="font-size: 12px; color: #64748b;">Ketik nomor WhatsApp Pengawas Pembina untuk mengirim laporan ringkas & file sinkronisasi (.json).</p>
+                        <h3 class="section-heading" style="color: #0f172a;">Kirim Data Sekolah ke WhatsApp Pengawas</h3>
+                        <p class="section-subtext">Ketik nomor WhatsApp Pengawas Pembina untuk mengirim laporan ringkas & file sinkronisasi (.json).</p>
                     </div>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 14px;">
                     <div class="form-group">
                         <label style="color: #15803d;">Nomor WhatsApp Pengawas Tujuan *</label>
-                        <input type="tel" id="waTargetInput" placeholder="Contoh: 081234567890 atau 6281234567890" class="form-control" style="font-size: 15px; padding: 10px 14px; border-color: #22c55e; background: #f0fdf4;">
-                        <p style="font-size: 11px; color: #64748b; margin-top: 4px;">Format awal <strong>08...</strong> atau <strong>628...</strong> akan otomatis dikonversi ke format internasional WhatsApp.</p>
+                        <input type="tel" id="waTargetInput" placeholder="Contoh: 081234567890 atau 6281234567890" class="form-control" style="padding: 10px 14px; border-color: #22c55e; background: #f0fdf4;">
+                        <p style="font-size: calc(11px * var(--ui-scale)); color: #64748b; margin-top: 4px;">Format awal <strong>08...</strong> atau <strong>628...</strong> akan otomatis dikonversi ke format internasional WhatsApp.</p>
                     </div>
 
                     <div class="form-group">
                         <label>Pratinjau Pesan Ringkasan Otomatis</label>
-                        <textarea id="waMessagePreview" rows="6" class="form-control" style="font-size: 12px; font-weight: 500; line-height: 1.5; background: #f8fafc; resize: vertical;"></textarea>
+                        <textarea id="waMessagePreview" rows="6" class="form-control" style="font-weight: 500; line-height: 1.5; background: #f8fafc; resize: vertical;"></textarea>
                     </div>
 
-                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #92400e; line-height: 1.5;">
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: calc(11px * var(--ui-scale)); color: #92400e; line-height: 1.5;">
                         <strong>💡 Pilih Cara Pengiriman di Bawah Ini:</strong><br>
                         1. <strong>Bagikan File Langsung (HP/Tablet Android):</strong> Melampirkan file <code id="waFileNameHint">PBD_Sekolah.json</code> secara otomatis ke menu Share WhatsApp.<br>
                         2. <strong>Unduh File .JSON Dulu (Laptop/PC):</strong> Mengunduh file ke folder <em>Download</em>, lalu klik tombol buka WhatsApp untuk melampirkannya.
                     </div>
 
-                    <div id="manualDownloadBox" style="display: none; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #065f46;">
+                    <div id="manualDownloadBox" style="display: none; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 10px 12px; font-size: calc(12px * var(--ui-scale)); color: #065f46;">
                         <div style="font-weight: 700; margin-bottom: 4px;">✅ File Siap! Jika belum otomatis tersimpan, klik tautan biru ini:</div>
                         <a id="manualDownloadLink" href="#" download="PBD_Sekolah.json" style="color: #047857; font-weight: 800; text-decoration: underline;">⬇️ Unduh Manual File (.json) Sekarang</a>
                     </div>
@@ -307,13 +351,13 @@
 
                 <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
                     <button type="button" onclick="closeWhatsappSendModal()" class="btn btn-slate">Tutup</button>
-                    <button type="button" onclick="shareFileNativeAndroid()" class="btn btn-indigo" style="padding: 8px 14px; font-size: 12px;" title="Melampirkan file .json langsung lewat menu Share Android/iOS">
+                    <button type="button" onclick="shareFileNativeAndroid()" class="btn btn-indigo" style="padding: 8px 14px;" title="Melampirkan file .json langsung lewat menu Share Android/iOS">
                         📲 Bagikan File ke WA (HP/Tablet)
                     </button>
-                    <button type="button" onclick="downloadJsonOnlyInModal()" class="btn btn-teal" style="padding: 8px 14px; font-size: 12px;">
+                    <button type="button" onclick="downloadJsonOnlyInModal()" class="btn btn-teal" style="padding: 8px 14px;">
                         1️⃣ Unduh File (.json)
                     </button>
-                    <button type="button" onclick="openWhatsappChatOnly()" class="btn btn-wa" style="padding: 8px 16px; font-size: 12px;">
+                    <button type="button" onclick="openWhatsappChatOnly()" class="btn btn-wa" style="padding: 8px 16px;">
                         2️⃣ Buka WhatsApp →
                     </button>
                 </div>
@@ -327,25 +371,25 @@
                 <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
                     <div style="width: 40px; height: 40px; border-radius: 10px; background: #ccfbf1; color: #0f766e; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">✦</div>
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 700;">Unggah File Unduhan Rapor Pendidikan (.xlsx)</h3>
-                        <p style="font-size: 12px; color: #64748b;">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>) dan memetakannya ke 8 SNP.</p>
+                        <h3 class="section-heading">Unggah File Unduhan Rapor Pendidikan (.xlsx)</h3>
+                        <p class="section-subtext">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>) dan memetakannya ke 8 SNP.</p>
                     </div>
                 </div>
 
                 <div class="file-btn-wrapper" style="width:100%; border: 2px dashed #cbd5e1; border-radius: 12px; padding: 24px; text-align: center; background-color: #f8fafc; cursor: pointer; margin-bottom: 16px; display:block;">
                     <div style="font-size: 28px; margin-bottom: 8px;">📊</div>
-                    <p style="font-size: 12px; font-weight: 700; color: #334155;">Klik untuk memilih Berkas Excel Rapor Pendidikan</p>
-                    <p style="font-size: 11px; color: #94a3b8; margin-top: 4px;">Format .xlsx, .xls, atau .csv resmi platform Rapor Pendidikan</p>
+                    <p class="section-subtext" style="font-weight: 700; color: #334155;">Klik untuk memilih Berkas Excel Rapor Pendidikan</p>
+                    <p style="font-size: calc(11px * var(--ui-scale)); color: #64748b; margin-top: 4px;">Format .xlsx, .xls, atau .csv resmi platform Rapor Pendidikan</p>
                     <input type="file" id="raporFileInput" onchange="handleFileSelect(event)" accept=".xlsx,.xls,.csv">
                 </div>
 
                 <div id="fileSelectedInfo" style="display: none; background: #f1f5f9; padding: 10px; border-radius: 8px; margin-bottom: 16px; justify-content: space-between; align-items: center;">
-                    <span id="fileNameText" style="font-size: 12px; font-weight: 600;">file.xlsx</span>
-                    <span id="fileSizeText" style="font-size: 10px; color: #94a3b8;">0 KB</span>
+                    <span id="fileNameText" class="section-subtext" style="font-weight: 600;">file.xlsx</span>
+                    <span id="fileSizeText" style="font-size: calc(10px * var(--ui-scale)); color: #64748b;">0 KB</span>
                 </div>
 
                 <div id="aiProcessingState" style="display: none; text-align: center; padding: 12px;">
-                    <p style="font-size: 12px; font-weight: 700; color: #0f766e;">Membaca Indikator Rapor & Menyusun Pemetaan 8 SNP...</p>
+                    <p class="section-subtext" style="font-weight: 700; color: #0f766e;">Membaca Indikator Rapor & Menyusun Pemetaan 8 SNP...</p>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 8px;">
@@ -361,12 +405,12 @@
                 <button type="button" onclick="closeSnpDetailModal()" class="modal-close">✕</button>
                 <div style="border-bottom: 2px solid #e2e8f0; padding-bottom: 12px; margin-bottom: 16px;">
                     <span id="snpModalBadge" class="badge badge-emerald" style="margin-bottom: 4px;">Standar Terpenuhi</span>
-                    <h3 id="snpModalTitle" style="font-size: 16px; font-weight: 700; color: #0f172a;">Penjabaran Standar</h3>
+                    <h3 id="snpModalTitle" class="section-heading" style="color: #0f172a;">Penjabaran Standar</h3>
                 </div>
 
                 <div style="display: flex; flex-direction: column; gap: 16px;">
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">1. Indikator Rapor Pendidikan Terkait</h4>
+                        <h4 style="font-size: calc(13px * var(--ui-scale)); font-weight: 700; color: #475569; margin-bottom: 8px;">1. Indikator Rapor Pendidikan Terkait</h4>
                         <div class="table-responsive">
                             <table>
                                 <thead>
@@ -383,12 +427,12 @@
                     </div>
 
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">2. Hasil Refleksi Internal TPS</h4>
-                        <div id="snpModalReflectionContent" style="font-size: 12px; color: #334155;"></div>
+                        <h4 style="font-size: calc(13px * var(--ui-scale)); font-weight: 700; color: #475569; margin-bottom: 8px;">2. Hasil Refleksi Internal TPS</h4>
+                        <div id="snpModalReflectionContent" class="section-subtext" style="color: #334155;"></div>
                     </div>
 
                     <div>
-                        <h4 style="font-size: 13px; font-weight: 700; color: #475569; margin-bottom: 8px;">3. Program Kerja Tahunan (RKT) Terkait</h4>
+                        <h4 style="font-size: calc(13px * var(--ui-scale)); font-weight: 700; color: #475569; margin-bottom: 8px;">3. Program Kerja Tahunan (RKT) Terkait</h4>
                         <div class="table-responsive">
                             <table>
                                 <thead>
@@ -461,11 +505,11 @@
             </div>
 
             <div class="card">
-                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px;">
-                    <h3 style="font-size: 14px; font-weight: 700; color: #1e293b;">
+                <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; flex-wrap: wrap; gap: 8px;">
+                    <h3 class="section-heading">
                         🏆 Peta Capaian Mutu Sekolah Berdasarkan 8 Standar Nasional Pendidikan (8 SNP)
                     </h3>
-                    <span style="font-size: 11px; color: #64748b; font-weight: 600;">💡 Klik kartu standar untuk melihat detail rencana pembenahan</span>
+                    <span class="section-subtext" style="font-weight: 600;">💡 Klik kartu standar untuk melihat detail rencana pembenahan</span>
                 </div>
                 <div id="snpGridOverview" class="grid-4"></div>
             </div>
@@ -474,22 +518,22 @@
                 <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
                         <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-                            <h3 style="font-size: 14px; font-weight: 700;">Grafik Radar Profil Mutu Satuan Pendidikan</h3>
+                            <h3 class="section-heading">Grafik Radar Profil Mutu Satuan Pendidikan</h3>
                             <span id="radarSubtitleBadge" class="badge badge-blue">SMPN 3 Tarogong Kidul (SMP)</span>
                         </div>
                         <div style="height: 360px; position: relative;">
                             <canvas id="radarChart"></canvas>
                         </div>
                     </div>
-                    <p style="font-size: 11px; color: #64748b; margin-top: 8px; text-align: center;">
+                    <p class="section-subtext" style="margin-top: 8px; text-align: center;">
                         💡 Arahkan kursor / sentuh titik pada grafik untuk melihat rincian deskripsi lengkap tiap kode indikator.
                     </p>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
                     <div>
-                        <h3 style="font-size: 14px; font-weight: 700; margin-bottom: 8px; color: #dc2626;">🎯 Indikator Prioritas Benahi Sekolah</h3>
-                        <p style="font-size: 12px; color: #64748b; margin-bottom: 12px;">Indikator utama yang menjadi fokus intervensi dalam RKT & RKAS:</p>
+                        <h3 class="section-heading" style="margin-bottom: 8px; color: #dc2626;">🎯 Indikator Prioritas Benahi Sekolah</h3>
+                        <p class="section-subtext" style="margin-bottom: 12px;">Indikator utama yang menjadi fokus intervensi dalam RKT & RKAS:</p>
                         <div id="priorityListDashboard" style="display: flex; flex-direction: column; gap: 8px;"></div>
                     </div>
                     <button type="button" onclick="switchTab('tab-benahi')" class="btn btn-teal" style="width: 100%; margin-top: 16px; justify-content: center;">
@@ -504,8 +548,8 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 700;">Tahap 1: Identifikasi Capaian Rapor & Pemetaan 8 SNP</h3>
-                        <p style="font-size: 12px; color: #64748b;">Unggah file Excel Rapor Pendidikan atau sunting langsung nilai indikator sekolah Anda pada tabel di bawah.</p>
+                        <h3 class="section-heading">Tahap 1: Identifikasi Capaian Rapor & Pemetaan 8 SNP</h3>
+                        <p class="section-subtext">Unggah file Excel Rapor Pendidikan atau sunting langsung nilai indikator sekolah Anda pada tabel di bawah.</p>
                     </div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
                         <button type="button" onclick="cleanNonJenjangIndicators()" class="btn btn-slate" title="Hapus indikator SMK/PAUD jika jenjang adalah SMP">🧹 Bersihkan Indikator Non-Jenjang</button>
@@ -541,8 +585,8 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 700;">Tahap 2: Lembar Kerja Refleksi & Akar Masalah (Tim Pengembang Sekolah)</h3>
-                        <p style="font-size: 12px; color: #64748b;">Catat hasil diskusi dewan guru mengenai akar penyebab masalah dan bukti nyata dari observasi kelas/rapor.</p>
+                        <h3 class="section-heading">Tahap 2: Lembar Kerja Refleksi & Akar Masalah (Tim Pengembang Sekolah)</h3>
+                        <p class="section-subtext">Catat hasil diskusi dewan guru mengenai akar penyebab masalah dan bukti nyata dari observasi kelas/rapor.</p>
                     </div>
                     <div style="display:flex; gap:8px;">
                         <button type="button" onclick="autoGenerateAIReflections()" class="btn btn-amber">✦ Bantu Susun Refleksi Awal</button>
@@ -573,8 +617,8 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 700;">Tahap 3: Rencana Kerja Tahunan (RKT) Satuan Pendidikan</h3>
-                        <p style="font-size: 12px; color: #64748b;">Susun program pembenahan beserta penanggung jawab (Guru/Wakasek/Koordinator) dan jadwal pelaksanaannya.</p>
+                        <h3 class="section-heading">Tahap 3: Rencana Kerja Tahunan (RKT) Satuan Pendidikan</h3>
+                        <p class="section-subtext">Susun program pembenahan beserta penanggung jawab (Guru/Wakasek/Koordinator) dan jadwal pelaksanaannya.</p>
                     </div>
                     <div style="display:flex; gap:8px;">
                         <button type="button" onclick="autoSuggestRkt()" class="btn btn-amber">✦ Rekomendasi Kegiatan Benahi</button>
@@ -604,8 +648,8 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 700;">Tahap 4: Rancangan Penganggaran ARKAS (RKAS PBD)</h3>
-                        <p style="font-size: 12px; color: #64748b;">Rincian belanja untuk diinput Bendahara BOSP ke dalam aplikasi ARKAS Kemendikdasmen.</p>
+                        <h3 class="section-heading">Tahap 4: Rancangan Penganggaran ARKAS (RKAS PBD)</h3>
+                        <p class="section-subtext">Rincian belanja untuk diinput Bendahara BOSP ke dalam aplikasi ARKAS Kemendikdasmen.</p>
                     </div>
                     <button type="button" onclick="addArkasRow()" class="btn btn-emerald">+ Tambah Rincian Belanja ARKAS</button>
                 </div>
@@ -617,12 +661,12 @@
                         <input type="number" id="paguBospInput" value="150000000" onchange="updateBospPagu(this.value)" class="form-control" style="background: white;">
                     </div>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Total Rencana Belanja PBD</span>
-                        <span id="arkasTotalTop" style="font-size: 18px; font-weight: 800; color: #0f172a; margin-top: 4px;">Rp 0</span>
+                        <span class="stat-title">Total Rencana Belanja PBD</span>
+                        <span id="arkasTotalTop" style="font-size: calc(18px * var(--ui-scale)); font-weight: 800; color: #0f172a; margin-top: 4px;">Rp 0</span>
                     </div>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <span style="font-size: 11px; font-weight: 700; color: #64748b; text-transform: uppercase;">Sisa Pagu BOSP (Untuk Operasional Rutin)</span>
-                        <span id="sisaPaguBosp" style="font-size: 18px; font-weight: 800; color: #059669; margin-top: 4px;">Rp 150.000.000</span>
+                        <span class="stat-title">Sisa Pagu BOSP (Untuk Operasional Rutin)</span>
+                        <span id="sisaPaguBosp" style="font-size: calc(18px * var(--ui-scale)); font-weight: 800; color: #059669; margin-top: 4px;">Rp 150.000.000</span>
                     </div>
                 </div>
 
@@ -645,7 +689,7 @@
                         <tfoot>
                             <tr style="background: #f8fafc; font-weight: bold;">
                                 <td colspan="7" style="text-align: right; text-transform: uppercase;">Total Anggaran Kegiatan Benahi PBD:</td>
-                                <td id="arkasTotalSum" style="color: #0d9488; font-size: 14px;">Rp 0</td>
+                                <td id="arkasTotalSum" style="color: #0d9488; font-size: calc(14px * var(--ui-scale));">Rp 0</td>
                                 <td></td>
                             </tr>
                         </tfoot>
@@ -659,8 +703,8 @@
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
                     <div>
-                        <h3 style="font-size: 15px; font-weight: 700; color: #1e293b;">📋 Monitoring Keterlaksanaan Program & Arsip Bukti Fisik</h3>
-                        <p style="font-size: 12px; color: #64748b;">Catat progres pelaksanaan RKT dan lampirkan dokumen/tautan bukti fisik (Google Drive) sebagai kesiapan supervisi Pengawas Sekolah.</p>
+                        <h3 class="section-heading">📋 Monitoring Keterlaksanaan Program & Arsip Bukti Fisik</h3>
+                        <p class="section-subtext">Catat progres pelaksanaan RKT dan lampirkan dokumen/tautan bukti fisik (Google Drive) sebagai kesiapan supervisi Pengawas Sekolah.</p>
                     </div>
                     <button type="button" onclick="syncMonevFromRKT()" class="btn btn-amber">↻ Tarik Daftar Kegiatan dari RKT</button>
                 </div>
@@ -688,8 +732,8 @@
         <div id="tab-dokumen" class="tab-content">
             <div class="card no-print" style="display:flex; justify-content:space-between; align-items:center; flex-wrap:wrap; gap:10px; background:#f0fdfa; border-color:#99f6e4;">
                 <div>
-                    <strong style="color:#115e59; font-size:13px;">Pilih Jenis Dokumen Siap Cetak / PDF:</strong>
-                    <p style="font-size:11px; color:#0f766e;">Gunakan tombol <strong>🖨 Cetak Dokumen</strong> di pojok kanan atas setelah memilih format dokumen di samping.</p>
+                    <strong style="color:#115e59; font-size:calc(13px * var(--ui-scale));">Pilih Jenis Dokumen Siap Cetak / PDF:</strong>
+                    <p style="font-size:calc(11px * var(--ui-scale)); color:#0f766e;">Gunakan tombol <strong>🖨 Cetak Dokumen</strong> di pojok kanan atas setelah memilih format dokumen di samping. (Ukuran cetak otomatis standar A4/F4).</p>
                 </div>
                 <div style="display:flex; gap:8px; flex-wrap:wrap;">
                     <button type="button" onclick="switchDocMode('eds')" id="btnDocEds" class="btn btn-teal">📄 Laporan Lengkap EDS-PBD</button>
@@ -698,7 +742,7 @@
                 </div>
             </div>
 
-            <!-- DOKUMEN A: LAPORAN LENGKAP EDS-PBD -->
+            <!-- DOKUMEN A: LAPORAN LENGKAP EDS-PBD (FORMAT CETAK STANDAR) -->
             <div id="docEdsContainer" class="card" style="max-width: 950px; margin: 0 auto; padding: 32px;">
                 <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 16px; margin-bottom: 20px;">
                     <h2 style="font-size: 18px; font-weight: 800; text-transform: uppercase;">DOKUMEN EVALUASI DIRI & PERENCANAAN BERBASIS DATA (EDS-PBD)</h2>
@@ -715,7 +759,7 @@
                 <div style="margin-bottom: 22px;">
                     <h4 style="font-size: 13px; font-weight: 700; border-left: 4px solid #0d9488; padding-left: 8px; text-transform: uppercase; margin-bottom: 8px;">II. HASIL IDENTIFIKASI & REFLEKSI AKAR MASALAH</h4>
                     <div class="table-responsive">
-                        <table style="border: 1px solid #cbd5e1;">
+                        <table style="border: 1px solid #cbd5e1; font-size: 12px;">
                             <thead>
                                 <tr>
                                     <th style="border: 1px solid #cbd5e1;">No</th>
@@ -733,7 +777,7 @@
                 <div style="margin-bottom: 22px;">
                     <h4 style="font-size: 13px; font-weight: 700; border-left: 4px solid #0d9488; padding-left: 8px; text-transform: uppercase; margin-bottom: 8px;">III. RENCANA KERJA TAHUNAN (RKT) PEMBENAHAN MUTU</h4>
                     <div class="table-responsive">
-                        <table style="border: 1px solid #cbd5e1;">
+                        <table style="border: 1px solid #cbd5e1; font-size: 12px;">
                             <thead>
                                 <tr>
                                     <th style="border: 1px solid #cbd5e1;">Bidang</th>
@@ -773,14 +817,14 @@
                 </div>
             </div>
 
-            <!-- DOKUMEN B: LEMBAR KHUSUS RKT -->
+            <!-- DOKUMEN B: LEMBAR KHUSUS RKT (FORMAT CETAK STANDAR) -->
             <div id="docRktContainer" class="card" style="display:none; max-width: 950px; margin: 0 auto; padding: 32px;">
                 <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 20px;">
                     <h2 style="font-size: 17px; font-weight: 800; text-transform: uppercase;">MATRIKS RENCANA KERJA TAHUNAN (RKT) BERBASIS DATA</h2>
                     <p style="font-size: 13px; font-weight: 700; margin-top: 6px;"><span id="rktDocSchool">SMPN 3 Tarogong Kidul</span> | Tahun Pelajaran <span id="rktDocTP">2026/2027</span></p>
                 </div>
                 <div class="table-responsive">
-                    <table style="border: 1px solid #cbd5e1;">
+                    <table style="border: 1px solid #cbd5e1; font-size: 12px;">
                         <thead>
                             <tr>
                                 <th style="border: 1px solid #cbd5e1;">No</th>
@@ -797,14 +841,14 @@
                 </div>
             </div>
 
-            <!-- DOKUMEN C: LEMBAR RANCANGAN ARKAS -->
+            <!-- DOKUMEN C: LEMBAR RANCANGAN ARKAS (FORMAT CETAK STANDAR) -->
             <div id="docRkasContainer" class="card" style="display:none; max-width: 950px; margin: 0 auto; padding: 32px;">
                 <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 20px;">
                     <h2 style="font-size: 17px; font-weight: 800; text-transform: uppercase;">LEMBAR RANCANGAN PENGANGGARAN PBD (INPUT ARKAS BOSP)</h2>
                     <p style="font-size: 13px; font-weight: 700; margin-top: 6px;"><span id="rkasDocSchool">SMPN 3 Tarogong Kidul</span> | Tahun Anggaran <span id="rkasDocYear">2026</span></p>
                 </div>
                 <div class="table-responsive">
-                    <table style="border: 1px solid #cbd5e1;">
+                    <table style="border: 1px solid #cbd5e1; font-size: 12px;">
                         <thead>
                             <tr>
                                 <th style="border: 1px solid #cbd5e1;">No</th>
@@ -832,7 +876,7 @@
     </div>
 
     <!-- FOOTER -->
-    <footer class="no-print" style="background-color: #0f172a; color: #94a3b8; font-size: 11px; padding: 16px 0; border-top: 1px solid #1e293b;">
+    <footer class="no-print" style="background-color: #0f172a; color: #94a3b8; font-size: calc(11px * var(--ui-scale)); padding: 16px 0; border-top: 1px solid #1e293b;">
         <div style="max-width: 1400px; margin: 0 auto; padding: 0 16px; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 8px;">
             <p>© 2026 SIPBD-MUTU SATDIK 8 SNP — Edisi Kepala Sekolah & Tim Pengembang Sekolah (Kompatibel dengan SIPBD Pengawas)</p>
             <p>Pengembang: <strong style="color: #2dd4bf;">IFS</strong></p>
@@ -841,6 +885,39 @@
 
     <!-- JAVASCRIPT LOGIC -->
     <script>
+        /* ----------------------------------------------------
+           AKSESIBILITAS UKURAN TEKS (RAMAH USIA 50+)
+        ---------------------------------------------------- */
+        const FONT_SCALE_KEY = 'sipbd_satdik_ui_font_scale_v1';
+        let currentFontMode = 'normal';
+
+        function setUiFontScale(mode, silent = false) {
+            currentFontMode = mode || 'normal';
+            const root = document.documentElement;
+            root.classList.remove('font-large', 'font-xlarge');
+            if (currentFontMode === 'large') root.classList.add('font-large');
+            else if (currentFontMode === 'xlarge') root.classList.add('font-xlarge');
+
+            ['normal', 'large', 'xlarge'].forEach(m => {
+                const btn = document.getElementById('fontBtn-' + m);
+                if (btn) btn.classList.toggle('active', m === currentFontMode);
+            });
+
+            try { localStorage.setItem(FONT_SCALE_KEY, currentFontMode); } catch (e) {}
+
+            // Perbarui ukuran font label grafik radar jika sedang terbuka
+            if (document.getElementById('tab-ringkasan').classList.contains('active')) {
+                const jenjang = schoolData.jenjang || "SMP";
+                const inds = (schoolData.indicators || []).filter(ind => isIndicatorAllowedForJenjang(ind.code, ind.name, jenjang));
+                renderRadarChart(inds);
+            }
+
+            if (!silent) {
+                const labelMap = { normal: 'Normal (Standar)', large: 'Besar (Nyaman 50+)', xlarge: 'Ekstra Besar' };
+                showToast(`Ukuran Teks Layar: ${labelMap[currentFontMode]} (Cetak tetap standar)`);
+            }
+        }
+
         const STANDAR_NASIONAL_PENDIDIKAN = [
             "1. Standar Kompetensi Lulusan (SKL)",
             "2. Standar Isi",
@@ -956,7 +1033,6 @@
             return true;
         }
 
-        // Mengambil klu/caption singkat yang utuh (tidak terpotong hurufnya) untuk Grafik Radar
         function getShortIndicatorCaption(ind) {
             const code = String(ind.code || "").trim().toUpperCase();
             if (INDICATOR_SNP_DICTIONARY[code] && INDICATOR_SNP_DICTIONARY[code].short) {
@@ -1343,7 +1419,7 @@
         /* ----------------------------------------------------
            HELPER PEMBUNGKUS KALIMAT UNTUK RADAR
         ---------------------------------------------------- */
-        function wrapRadarLabel(fullText, maxCharsPerLine = 24) {
+        function wrapRadarLabel(fullText, maxCharsPerLine = 22) {
             const words = String(fullText || "").split(/\s+/);
             const lines = [];
             let currentLine = "";
@@ -1402,9 +1478,9 @@
                 card.innerHTML = `
                     <div style="display:flex; justify-content:space-between; align-items:center; margin-bottom:6px;">
                         <span class="snp-badge">${lbl}</span>
-                        <span style="font-size:11px; font-weight:700;">${snpInds.length} Indikator ▸</span>
+                        <span style="font-weight:700;">${snpInds.length} Indikator ▸</span>
                     </div>
-                    <div style="font-weight:700; font-size:12px;">${snpName}</div>
+                    <div style="font-weight:700;">${snpName}</div>
                 `;
                 grid.appendChild(card);
             });
@@ -1414,16 +1490,16 @@
             prioContainer.innerHTML = '';
             const prioList = inds.filter(i => i.capaian !== 'Baik').slice(0, 5);
             if (!prioList.length) {
-                prioContainer.innerHTML = '<div style="font-size:12px; color:#64748b;">Seluruh indikator sudah dalam kategori Baik.</div>';
+                prioContainer.innerHTML = '<div class="section-subtext">Seluruh indikator sudah dalam kategori Baik.</div>';
             } else {
                 prioList.forEach(p => {
                     prioContainer.innerHTML += `
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:8px; display:flex; flex-direction:column; gap:6px;">
+                        <div class="prio-item-card">
                             <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
-                                <span style="font-size:10px; font-weight:700; color:#0f766e;">${esc(p.snp)}</span>
+                                <span class="prio-item-snp">${esc(p.snp)}</span>
                                 <span class="badge ${p.capaian === 'Kurang' ? 'badge-rose' : 'badge-amber'}">${esc(p.capaian)} (${p.skor})</span>
                             </div>
-                            <div style="font-weight:600; font-size:12px; line-height:1.45; color:#0f172a;">
+                            <div class="prio-item-desc">
                                 <strong>${esc(p.code)}</strong> - ${esc(p.name)}
                             </div>
                         </div>
@@ -1431,7 +1507,11 @@
                 });
             }
 
-            // Radar Chart (Klu Caption Singkat Utuh Tanpa Terpotong)
+            renderRadarChart(inds);
+        }
+
+        function renderRadarChart(inds) {
+            const radarFontSize = currentFontMode === 'xlarge' ? 14 : (currentFontMode === 'large' ? 13 : 11);
             const radarSlice = inds.slice(0, 6);
             const ctx = document.getElementById('radarChart');
             if (!ctx || typeof Chart === 'undefined') return;
@@ -1457,7 +1537,12 @@
                         padding: { top: 8, bottom: 8, left: 12, right: 12 }
                     },
                     plugins: {
+                        legend: {
+                            labels: { font: { size: radarFontSize, weight: '600' } }
+                        },
                         tooltip: {
+                            titleFont: { size: radarFontSize + 1 },
+                            bodyFont: { size: radarFontSize },
                             callbacks: {
                                 title: function(items) {
                                     const idx = items[0].dataIndex;
@@ -1478,7 +1563,7 @@
                             max: 100,
                             ticks: { stepSize: 20, display: false },
                             pointLabels: {
-                                font: { size: 11, weight: '700' },
+                                font: { size: radarFontSize, weight: '700' },
                                 color: '#1e293b',
                                 padding: 8
                             }
@@ -1498,12 +1583,12 @@
                     ${ce('indicators', idx, 'code', ind.code)}
                     ${ce('indicators', idx, 'name', ind.name)}
                     <td>
-                        <select class="form-control" style="font-size:11px; padding:2px 4px;" onchange="setField('indicators',${idx},'snp',this.value)">
+                        <select class="form-control" style="font-size:inherit; padding:4px 6px;" onchange="setField('indicators',${idx},'snp',this.value)">
                             ${STANDAR_NASIONAL_PENDIDIKAN.map(s => `<option value="${s}" ${s === ind.snp ? 'selected' : ''}>${s}</option>`).join('')}
                         </select>
                     </td>
                     <td>
-                        <select class="form-control" style="font-size:11px; padding:2px 4px;" onchange="setField('indicators',${idx},'capaian',this.value); renderIndicatorsTable();">
+                        <select class="form-control" style="font-size:inherit; padding:4px 6px;" onchange="setField('indicators',${idx},'capaian',this.value); renderIndicatorsTable();">
                             ${CAP.map(c => `<option value="${c}" ${c === ind.capaian ? 'selected' : ''}>${c}</option>`).join('')}
                         </select>
                     </td>
@@ -1534,7 +1619,7 @@
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
                     <td>
-                        <select class="form-control" style="font-size:11px;" onchange="setField('reflections',${idx},'indicator',this.value)">
+                        <select class="form-control" style="font-size:inherit;" onchange="setField('reflections',${idx},'indicator',this.value)">
                             ${schoolData.indicators.map(i => `<option value="${i.code} ${i.name}" ${ref.indicator.includes(i.code) ? 'selected' : ''}>${getShortIndicatorCaption(i)}</option>`).join('')}
                         </select>
                     </td>
@@ -1632,7 +1717,7 @@
                     ${ce('arkas', idx, 'kodeArkas', a.kodeArkas)}
                     ${ce('arkas', idx, 'uraian', a.uraian)}
                     <td>
-                        <select class="form-control" style="font-size:11px; padding:2px 4px;" onchange="setField('arkas',${idx},'sumberDana',this.value)">
+                        <select class="form-control" style="font-size:inherit; padding:4px 6px;" onchange="setField('arkas',${idx},'sumberDana',this.value)">
                             <option value="BOSP Reguler" ${(a.sumberDana || 'BOSP Reguler') === 'BOSP Reguler' ? 'selected' : ''}>BOSP Reguler</option>
                             <option value="BOSP Kinerja" ${a.sumberDana === 'BOSP Kinerja' ? 'selected' : ''}>BOSP Kinerja</option>
                             <option value="Non-Anggaran" ${a.sumberDana === 'Non-Anggaran' ? 'selected' : ''}>Non-Anggaran</option>
@@ -1682,7 +1767,7 @@
                     ${ce('monev', idx, 'kegiatanKonkret', m.kegiatanKonkret)}
                     ${ce('monev', idx, 'target', m.target)}
                     <td>
-                        <select class="form-control" style="font-size:11px;" onchange="setField('monev',${idx},'status',this.value)">
+                        <select class="form-control" style="font-size:inherit;" onchange="setField('monev',${idx},'status',this.value)">
                             <option value="Belum" ${m.status === 'Belum' ? 'selected' : ''}>Belum</option>
                             <option value="Proses" ${m.status === 'Proses' ? 'selected' : ''}>Proses</option>
                             <option value="Terlaksana" ${m.status === 'Terlaksana' ? 'selected' : ''}>Terlaksana</option>
@@ -1952,6 +2037,11 @@
         }
 
         window.onload = function() {
+            try {
+                const savedFont = localStorage.getItem(FONT_SCALE_KEY);
+                if (savedFont) setUiFontScale(savedFont, true);
+            } catch (e) {}
+
             loadPersisted();
             syncAllUI();
         };
