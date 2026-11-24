@@ -21,7 +21,7 @@
         td[contenteditable]:hover { background: #eef2ff; outline: 1px dashed #a5b4fc; } 
         td[contenteditable]:focus { background: #fff; outline: 2px solid #0d9488; }
         
-        /* Header & Navigation (Teal/Emerald Nuance for School Edition) */
+        /* Header & Navigation */
         header { background: linear-gradient(135deg, #0f172a 0%, #115e59 100%); color: white; padding: calc(12px + env(safe-area-inset-top, 0px)) 20px 12px; box-shadow: 0 4px 6px -1px rgba(0,0,0,0.1); position: sticky; top: 0; z-index: 40; }
         .header-container { max-width: 1400px; margin: 0 auto; display: flex; justify-content: space-between; align-items: center; flex-wrap: wrap; gap: 12px; }
         .brand { display: flex; align-items: center; gap: 12px; }
@@ -36,6 +36,8 @@
         .btn { padding: 6px 14px; border-radius: 6px; font-size: 12px; font-weight: 600; border: none; cursor: pointer; display: inline-flex; align-items: center; gap: 6px; transition: all 0.2s; position: relative; }
         .btn-teal { background-color: #0d9488; color: white; }
         .btn-teal:hover { background-color: #0f766e; }
+        .btn-wa { background-color: #16a34a; color: white; box-shadow: 0 2px 6px rgba(22, 163, 74, 0.3); }
+        .btn-wa:hover { background-color: #15803d; }
         .btn-amber { background: linear-gradient(135deg, #fbbf24, #f59e0b); color: #0f172a; }
         .btn-amber:hover { background: #f59e0b; }
         .btn-indigo { background-color: #4f46e5; color: white; }
@@ -194,11 +196,14 @@
                 <button type="button" onclick="openAiUploadModal()" class="btn btn-amber" style="font-weight: 700;">
                     ✦ Unggah Rapor Excel
                 </button>
-                <button type="button" onclick="exportForSupervisorJSON()" class="btn btn-teal" title="Kirim paket data sekolah ini (.json) agar dapat diimpor langsung ke aplikasi Pengawas Pembina">
-                    📤 Kirim Data ke Pengawas (.json)
+                <button type="button" onclick="openWhatsappSendModal()" class="btn btn-wa" title="Ketik Nomor WhatsApp Pengawas & Kirim Data Sekolah Secara Langsung">
+                    💬 Kirim via WhatsApp
+                </button>
+                <button type="button" onclick="exportForSupervisorJSON()" class="btn btn-teal" title="Unduh paket data sekolah (.json) tanpa membuka WhatsApp">
+                    💾 Simpan File (.json)
                 </button>
                 <div class="btn btn-slate file-btn-wrapper" title="Muat file data sekolah (.json)">
-                    <span>📂 Muat File Data</span>
+                    <span>📂 Muat Data</span>
                     <input type="file" id="importSchoolJSON" onchange="importSchoolJSON(event)" accept=".json,application/json">
                 </div>
                 <button type="button" onclick="handlePrintDocument()" class="btn btn-emerald">
@@ -240,7 +245,7 @@
                 </div>
             </div>
             
-            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;" class="grid-4">
+            <div style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #f1f5f9;" class="grid-5">
                 <div class="form-group">
                     <label style="color: #0f766e;">Nama Kepala Sekolah</label>
                     <input type="text" id="kepsekName" placeholder="Nama Kepala Sekolah & Gelar" onchange="updateIdentity()" class="form-control" style="background-color: #f0fdfa;">
@@ -256,6 +261,61 @@
                 <div class="form-group">
                     <label style="color: #4338ca;">Pengawas Sekolah Pembina</label>
                     <input type="text" id="supervisorName" value="Ida Faridlah Sulaeman" onchange="updateIdentity()" class="form-control" style="background-color: #eef2ff;">
+                </div>
+                <div class="form-group">
+                    <label style="color: #15803d;">No. WhatsApp Pengawas</label>
+                    <input type="tel" id="supervisorPhone" placeholder="Contoh: 081234567890" onchange="updateIdentity()" class="form-control" style="background-color: #f0fdf4; border-color: #86efac;">
+                </div>
+            </div>
+        </div>
+
+        <!-- MODAL KIRIM DATA VIA WHATSAPP -->
+        <div id="whatsappSendModal" class="modal-overlay">
+            <div class="modal-body" style="max-width: 520px;">
+                <button type="button" onclick="closeWhatsappSendModal()" class="modal-close">✕</button>
+                <div style="display: flex; align-items: center; gap: 12px; margin-bottom: 16px;">
+                    <div style="width: 44px; height: 44px; border-radius: 12px; background: #dcfce7; color: #16a34a; display: flex; align-items: center; justify-content: center; font-size: 22px; font-weight: bold;">💬</div>
+                    <div>
+                        <h3 style="font-size: 16px; font-weight: 700; color: #0f172a;">Kirim Data Sekolah ke WhatsApp Pengawas</h3>
+                        <p style="font-size: 12px; color: #64748b;">Ketik nomor WhatsApp Pengawas Pembina untuk mengirim laporan ringkas & file sinkronisasi (.json).</p>
+                    </div>
+                </div>
+
+                <div style="display: flex; flex-direction: column; gap: 14px;">
+                    <div class="form-group">
+                        <label style="color: #15803d;">Nomor WhatsApp Pengawas Tujuan *</label>
+                        <input type="tel" id="waTargetInput" placeholder="Contoh: 081234567890 atau 6281234567890" class="form-control" style="font-size: 15px; padding: 10px 14px; border-color: #22c55e; background: #f0fdf4;">
+                        <p style="font-size: 11px; color: #64748b; margin-top: 4px;">Format awal <strong>08...</strong> atau <strong>628...</strong> akan otomatis dikonversi ke format internasional WhatsApp.</p>
+                    </div>
+
+                    <div class="form-group">
+                        <label>Pratinjau Pesan Ringkasan Otomatis</label>
+                        <textarea id="waMessagePreview" rows="6" class="form-control" style="font-size: 12px; font-weight: 500; line-height: 1.5; background: #f8fafc; resize: vertical;"></textarea>
+                    </div>
+
+                    <div style="background: #fffbeb; border: 1px solid #fde68a; border-radius: 8px; padding: 10px 12px; font-size: 11px; color: #92400e; line-height: 1.5;">
+                        <strong>💡 Pilih Cara Pengiriman di Bawah Ini:</strong><br>
+                        1. <strong>Bagikan File Langsung (HP/Tablet Android):</strong> Melampirkan file <code id="waFileNameHint">PBD_Sekolah.json</code> secara otomatis ke menu Share WhatsApp.<br>
+                        2. <strong>Unduh File .JSON Dulu (Laptop/PC):</strong> Mengunduh file ke folder <em>Download</em>, lalu klik tombol buka WhatsApp untuk melampirkannya.
+                    </div>
+
+                    <div id="manualDownloadBox" style="display: none; background: #ecfdf5; border: 1px solid #6ee7b7; border-radius: 8px; padding: 10px 12px; font-size: 12px; color: #065f46;">
+                        <div style="font-weight: 700; margin-bottom: 4px;">✅ File Siap! Jika belum otomatis tersimpan, klik tautan biru ini:</div>
+                        <a id="manualDownloadLink" href="#" download="PBD_Sekolah.json" style="color: #047857; font-weight: 800; text-decoration: underline;">⬇️ Unduh Manual File (.json) Sekarang</a>
+                    </div>
+                </div>
+
+                <div style="display: flex; justify-content: flex-end; gap: 8px; margin-top: 18px; flex-wrap: wrap;">
+                    <button type="button" onclick="closeWhatsappSendModal()" class="btn btn-slate">Tutup</button>
+                    <button type="button" onclick="shareFileNativeAndroid()" class="btn btn-indigo" style="padding: 8px 14px; font-size: 12px;" title="Melampirkan file .json langsung lewat menu Share Android/iOS">
+                        📲 Bagikan File ke WA (HP/Tablet)
+                    </button>
+                    <button type="button" onclick="downloadJsonOnlyInModal()" class="btn btn-teal" style="padding: 8px 14px; font-size: 12px;">
+                        1️⃣ Unduh File (.json)
+                    </button>
+                    <button type="button" onclick="openWhatsappChatOnly()" class="btn btn-wa" style="padding: 8px 16px; font-size: 12px;">
+                        2️⃣ Buka WhatsApp →
+                    </button>
                 </div>
             </div>
         </div>
@@ -814,6 +874,7 @@
             tpsLeaderName: "",
             supervisorName: "Ida Faridlah Sulaeman",
             supervisorNIP: "1972xxxx1998022xxx",
+            supervisorPhone: "",
             supervisorRegion: "Dinas Pendidikan Kab. Garut",
             paguBosp: 150000000,
             indicators: [
@@ -856,7 +917,7 @@
             const t = document.getElementById('syncToast');
             document.getElementById('syncToastText').textContent = msg;
             t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3200);
+            setTimeout(() => t.style.display = 'none', 3500);
         }
 
         function handlePrintDocument() {
@@ -870,30 +931,158 @@
         }
 
         /* ----------------------------------------------------
+           KIRIM DATA VIA WHATSAPP LANGSUNG KE NOMOR PENGAWAS
+        ---------------------------------------------------- */
+        function formatWaNumber(rawPhone) {
+            let digits = String(rawPhone || "").replace(/\D/g, "");
+            if (!digits) return "";
+            if (digits.startsWith("0")) {
+                digits = "62" + digits.slice(1);
+            } else if (digits.startsWith("8")) {
+                digits = "62" + digits;
+            }
+            return digits;
+        }
+
+        function buildSummaryMessage(fileName) {
+            const litObj = schoolData.indicators.find(i => i.code === 'A.1');
+            const numObj = schoolData.indicators.find(i => i.code === 'A.2');
+            const litStr = litObj ? `${litObj.skor} (${litObj.capaian})` : '-';
+            const numStr = numObj ? `${numObj.skor} (${numObj.capaian})` : '-';
+            const prioList = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => `${i.code} ${i.name}`).slice(0, 3).join(', ') || 'Terpenuhi';
+            const totArkas = (schoolData.arkas || []).reduce((acc, a) => acc + ((parseFloat(a.vol) || 0) * (parseFloat(a.price) || 0)), 0);
+
+            return [
+                `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu *${schoolData.supervisorName || 'Pengawas Sekolah'}*,`,
+                ``,
+                `Berikut kami kirimkan Paket Data EDS-PBD 8 SNP dari:`,
+                `• *Sekolah:* ${schoolData.schoolName}`,
+                `• *NPSN:* ${schoolData.npsn}`,
+                `• *Kepala Sekolah:* ${schoolData.kepsekName || '-'}`,
+                `• *Capaian Literasi / Numerasi:* ${litStr} / ${numStr}`,
+                `• *Prioritas Pembenahan:* ${prioList}`,
+                `• *Estimasi Anggaran PBD:* Rp ${totArkas.toLocaleString('id-ID')}`,
+                ``,
+                `Terlampir file database sekolah (*${fileName}*) untuk digabungkan (Merge) ke dalam aplikasi SIPBD-MUTU Pengawas. Terima kasih.`
+            ].join("\n");
+        }
+
+        function openWhatsappSendModal() {
+            const cleanNpsn = (schoolData.npsn || "00000000").trim();
+            const fileName = `PBD_${schoolData.schoolName.replace(/\s+/g, '_')}_${cleanNpsn}.json`;
+            
+            document.getElementById('waTargetInput').value = schoolData.supervisorPhone || '';
+            document.getElementById('waFileNameHint').textContent = fileName;
+            document.getElementById('waMessagePreview').value = buildSummaryMessage(fileName);
+            document.getElementById('manualDownloadBox').style.display = 'none';
+            document.getElementById('whatsappSendModal').classList.add('open');
+        }
+
+        function closeWhatsappSendModal() {
+            document.getElementById('whatsappSendModal').classList.remove('open');
+        }
+
+        function createSchoolJsonBlob() {
+            const cleanNpsn = (schoolData.npsn || "00000000").trim();
+            const fileName = `PBD_${schoolData.schoolName.replace(/\s+/g, '_')}_${cleanNpsn}.json`;
+            const payload = {};
+            payload[cleanNpsn] = schoolData;
+            const jsonString = JSON.stringify(payload, null, 2);
+            const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
+            return { blob, fileName, jsonString };
+        }
+
+        // Metode 1: Web Share API (Melampirkan file .json langsung di HP/Tablet Android/iOS)
+        async function shareFileNativeAndroid() {
+            const { blob, fileName } = createSchoolJsonBlob();
+            const messageText = document.getElementById('waMessagePreview').value.trim() || buildSummaryMessage(fileName);
+
+            try {
+                const fileObj = new File([blob], fileName, { type: "application/json" });
+                if (navigator.canShare && navigator.canShare({ files: [fileObj] })) {
+                    await navigator.share({
+                        title: `Data PBD ${schoolData.schoolName}`,
+                        text: messageText,
+                        files: [fileObj]
+                    });
+                    showToast("Berhasil membagikan file ke WhatsApp!");
+                    return;
+                } else {
+                    alert("Browser perangkat ini tidak mendukung berbagi file langsung. Silakan gunakan tombol '1️⃣ Unduh File (.json)' lalu '2️⃣ Buka WhatsApp →'.");
+                }
+            } catch (err) {
+                if (err.name !== "AbortError") {
+                    alert("Gagal membuka menu berbagi: " + err.message + ". Silakan gunakan tombol '1️⃣ Unduh File (.json)'.");
+                }
+            }
+        }
+
+        // Metode 2A: Unduh file .json saja tanpa pindah aplikasi agar tidak diblokir browser
+        function downloadJsonOnlyInModal() {
+            const { blob, fileName } = createSchoolJsonBlob();
+            const url = URL.createObjectURL(blob);
+
+            const manualBox = document.getElementById('manualDownloadBox');
+            const manualLink = document.getElementById('manualDownloadLink');
+            manualLink.href = url;
+            manualLink.download = fileName;
+            manualLink.textContent = `⬇️ Unduh Manual: ${fileName}`;
+            manualBox.style.display = 'block';
+
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = fileName;
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+
+            showToast(`File ${fileName} diunduh! Sekarang klik tombol '2️⃣ Buka WhatsApp →'.`);
+        }
+
+        // Metode 2B: Buka chat WhatsApp ke nomor pengawas
+        function openWhatsappChatOnly() {
+            const rawPhone = document.getElementById('waTargetInput').value.trim();
+            const formattedPhone = formatWaNumber(rawPhone);
+
+            if (!formattedPhone || formattedPhone.length < 10) {
+                alert("Mohon ketik Nomor WhatsApp Pengawas yang valid (contoh: 081234567890).");
+                document.getElementById('waTargetInput').focus();
+                return;
+            }
+
+            schoolData.supervisorPhone = rawPhone;
+            const phoneBannerEl = document.getElementById('supervisorPhone');
+            if (phoneBannerEl) phoneBannerEl.value = rawPhone;
+            persist();
+
+            const { fileName } = createSchoolJsonBlob();
+            const messageText = document.getElementById('waMessagePreview').value.trim() || buildSummaryMessage(fileName);
+            const waUrl = `https://wa.me/${formattedPhone}?text=${encodeURIComponent(messageText)}`;
+
+            window.open(waUrl, '_blank', 'noopener,noreferrer');
+        }
+
+        /* ----------------------------------------------------
            INTEROPERABILITY: EKSPOR KE PENGAWAS & IMPOR DATA
         ---------------------------------------------------- */
         function exportForSupervisorJSON() {
+            const { blob, fileName } = createSchoolJsonBlob();
             try {
-                const payload = {};
-                const cleanNpsn = schoolData.npsn.trim() || "00000000";
-                payload[cleanNpsn] = schoolData;
-
-                const jsonString = JSON.stringify(payload, null, 2);
-                const blob = new Blob([jsonString], { type: "application/json;charset=utf-8" });
                 const url = URL.createObjectURL(blob);
                 const a = document.createElement('a');
                 a.href = url;
-                a.download = `PBD_${schoolData.schoolName.replace(/\s+/g, '_')}_${cleanNpsn}.json`;
+                a.download = fileName;
                 document.body.appendChild(a);
                 a.click();
                 setTimeout(() => {
                     document.body.removeChild(a);
                     URL.revokeObjectURL(url);
-                }, 200);
-                showToast("Paket data siap dikirimkan ke Pengawas Pembina!");
+                }, 1000);
+                showToast(`File ${fileName} berhasil disimpan di folder Download!`);
             } catch (err) {
                 alert("Gagal mengunduh paket data: " + err.message);
             }
+            return fileName;
         }
 
         function importSchoolJSON(event) {
@@ -956,6 +1145,7 @@
             schoolData.kepsekNIP = document.getElementById('kepsekNIP').value.trim();
             schoolData.tpsLeaderName = document.getElementById('tpsLeaderName').value.trim();
             schoolData.supervisorName = document.getElementById('supervisorName').value.trim();
+            schoolData.supervisorPhone = document.getElementById('supervisorPhone').value.trim();
             persist();
             syncAllUI();
         }
@@ -997,6 +1187,7 @@
             document.getElementById('kepsekNIP').value = schoolData.kepsekNIP || '';
             document.getElementById('tpsLeaderName').value = schoolData.tpsLeaderName || '';
             document.getElementById('supervisorName').value = schoolData.supervisorName || '';
+            document.getElementById('supervisorPhone').value = schoolData.supervisorPhone || '';
             document.getElementById('jenjangSelect').value = schoolData.jenjang || 'SMP';
             document.getElementById('paguBospInput').value = schoolData.paguBosp || 150000000;
 
@@ -1323,7 +1514,6 @@
         }
 
         function renderDocuments() {
-            // Header & Pengesahan EDS
             document.getElementById('repSchool').textContent = schoolData.schoolName;
             document.getElementById('repNPSN').textContent = schoolData.npsn;
             document.getElementById('repJenjang').textContent = schoolData.jenjang;
@@ -1365,7 +1555,6 @@
                 </tr>
             `).join('');
 
-            // Dokumen RKT Khusus
             document.getElementById('rktDocSchool').textContent = schoolData.schoolName;
             document.getElementById('rktDocTP').textContent = schoolData.targetTP;
             document.getElementById('docRktTableBody').innerHTML = (schoolData.rkt || []).map((r, i) => `
@@ -1380,7 +1569,6 @@
                 </tr>
             `).join('');
 
-            // Dokumen ARKAS Khusus
             document.getElementById('rkasDocSchool').textContent = schoolData.schoolName;
             document.getElementById('rkasDocYear').textContent = schoolData.evalYear;
             let sumArkas = 0;
