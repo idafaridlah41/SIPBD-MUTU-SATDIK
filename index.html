@@ -372,7 +372,7 @@
                     <div style="width: 40px; height: 40px; border-radius: 10px; background: #ccfbf1; color: #0f766e; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">✦</div>
                     <div>
                         <h3 class="section-heading">Unggah File Unduhan Rapor Pendidikan (.xlsx)</h3>
-                        <p class="section-subtext">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>) dan memetakannya ke 8 SNP.</p>
+                        <p class="section-subtext">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>), memetakannya ke 8 SNP, dan menyusun draf Refleksi, RKT, serta RKAS ARKAS.</p>
                     </div>
                 </div>
 
@@ -389,12 +389,12 @@
                 </div>
 
                 <div id="aiProcessingState" style="display: none; text-align: center; padding: 12px;">
-                    <p class="section-subtext" style="font-weight: 700; color: #0f766e;">Membaca Indikator Rapor & Menyusun Pemetaan 8 SNP...</p>
+                    <p class="section-subtext" style="font-weight: 700; color: #0f766e;">Membaca Indikator Rapor, Menyusun Pemetaan 8 SNP, RKT & Rancangan ARKAS...</p>
                 </div>
 
                 <div style="display: flex; justify-content: flex-end; gap: 8px;">
                     <button type="button" onclick="closeAiUploadModal()" class="btn btn-slate">Batal</button>
-                    <button type="button" id="btnStartAiProcess" onclick="processRaporWithAI()" disabled class="btn btn-teal">✦ Proses & Sinkronkan</button>
+                    <button type="button" id="btnStartAiProcess" onclick="processRaporWithAI()" disabled class="btn btn-teal">✦ Proses & Sinkronkan Semua Tahap</button>
                 </div>
             </div>
         </div>
@@ -612,7 +612,7 @@
             </div>
         </div>
 
-        <!-- TAB 4: PERENCANAAN RKT & ARKAS (DENGAN KALKULATOR PAGU BOSP) -->
+        <!-- TAB 4: PERENCANAAN RKT & ARKAS (DENGAN KALKULATOR PAGU BOSP & GENERATOR AI) -->
         <div id="tab-benahi" class="tab-content">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
@@ -620,7 +620,7 @@
                         <h3 class="section-heading">Tahap 3: Rencana Kerja Tahunan (RKT) Satuan Pendidikan</h3>
                         <p class="section-subtext">Susun program pembenahan beserta penanggung jawab (Guru/Wakasek/Koordinator) dan jadwal pelaksanaannya.</p>
                     </div>
-                    <div style="display:flex; gap:8px;">
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
                         <button type="button" onclick="autoSuggestRkt()" class="btn btn-amber">✦ Rekomendasi Kegiatan Benahi</button>
                         <button type="button" onclick="addRktRow()" class="btn btn-teal">+ Tambah Program RKT</button>
                     </div>
@@ -649,9 +649,14 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                     <div>
                         <h3 class="section-heading">Tahap 4: Rancangan Penganggaran ARKAS (RKAS PBD)</h3>
-                        <p class="section-subtext">Rincian belanja untuk diinput Bendahara BOSP ke dalam aplikasi ARKAS Kemendikdasmen.</p>
+                        <p class="section-subtext">Rincian belanja yang disinkronkan otomatis dari Rapor Pendidikan & RKT untuk diinput Bendahara BOSP ke aplikasi ARKAS.</p>
                     </div>
-                    <button type="button" onclick="addArkasRow()" class="btn btn-emerald">+ Tambah Rincian Belanja ARKAS</button>
+                    <div style="display:flex; gap:8px; flex-wrap:wrap;">
+                        <button type="button" onclick="autoGenerateArkasFromRaporAndRkt()" class="btn btn-amber" title="Susun otomatis rancangan belanja ARKAS berdasarkan indikator prioritas Rapor Pendidikan & RKT">
+                            ✦ Rekomendasi ARKAS Otomatis (Sinkron Rapor & RKT)
+                        </button>
+                        <button type="button" onclick="addArkasRow()" class="btn btn-emerald">+ Tambah Rincian Belanja ARKAS</button>
+                    </div>
                 </div>
 
                 <!-- Simulasi Pagu BOSP -->
@@ -905,7 +910,6 @@
 
             try { localStorage.setItem(FONT_SCALE_KEY, currentFontMode); } catch (e) {}
 
-            // Perbarui ukuran font label grafik radar jika sedang terbuka
             if (document.getElementById('tab-ringkasan').classList.contains('active')) {
                 const jenjang = schoolData.jenjang || "SMP";
                 const inds = (schoolData.indicators || []).filter(ind => isIndicatorAllowedForJenjang(ind.code, ind.name, jenjang));
@@ -1018,6 +1022,59 @@
             }
         };
 
+        // Kamus Referensi ARKAS PBD Resmi Kemendikdasmen per Kode Indikator Rapor Pendidikan
+        const ARKAS_PBD_TEMPLATES = {
+            "A.1": [
+                { kodeArkas: "04.06.01", uraian: "Konsumsi & ATK Komunitas Belajar (Kombel) Penguatan Literasi", sumberDana: "BOSP Reguler", vol: 30, satuan: "Orang/Kegiatan", price: 35000 },
+                { kodeArkas: "05.02.04", uraian: "Pengadaan Buku Bacaan Fiksi & Nonfiksi Bermutu Pojok Baca Kelas", sumberDana: "BOSP Reguler", vol: 60, satuan: "Eksemplar", price: 45000 }
+            ],
+            "A.2": [
+                { kodeArkas: "04.06.01", uraian: "Workshop / IHT Pembelajaran Numerasi Kontekstual & Pemecahan Masalah", sumberDana: "BOSP Reguler", vol: 25, satuan: "Orang/Kegiatan", price: 40000 },
+                { kodeArkas: "05.08.01", uraian: "Pengadaan Alat Peraga & Media Pembelajaran Matematika Interaktif", sumberDana: "BOSP Reguler", vol: 5, satuan: "Paket", price: 350000 }
+            ],
+            "A.3": [
+                { kodeArkas: "03.03.04", uraian: "Kegiatan Kokurikuler & Gelar Karya Penguatan Karakter Murid", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 2500000 }
+            ],
+            "C.3": [
+                { kodeArkas: "04.06.05", uraian: "Transport & Dukungan Pelatihan Peningkatan Kompetensi Pedagogik GTK", sumberDana: "BOSP Reguler", vol: 15, satuan: "Orang/Kegiatan", price: 100000 }
+            ],
+            "C.4": [
+                { kodeArkas: "04.06.02", uraian: "Honorarium Narasumber IHT Peningkatan Kompetensi Guru", sumberDana: "BOSP Reguler", vol: 2, satuan: "Orang/Jam", price: 500000 }
+            ],
+            "D.1": [
+                { kodeArkas: "04.06.01", uraian: "IHT Penyusunan Modul Ajar Berdiferensiasi & Pembelajaran Interaktif", sumberDana: "BOSP Reguler", vol: 30, satuan: "Orang/Kegiatan", price: 35000 },
+                { kodeArkas: "05.05.02", uraian: "Penggandaan Bahan Ajar & Lembar Kerja Murid (LKPD) Kontekstual", sumberDana: "BOSP Reguler", vol: 500, satuan: "Lembar", price: 500 }
+            ],
+            "D.2": [
+                { kodeArkas: "04.06.03", uraian: "Kegiatan Refleksi Pembelajaran & Peer Coaching Antar Guru (Kombel)", sumberDana: "BOSP Reguler", vol: 4, satuan: "Kegiatan", price: 450000 }
+            ],
+            "D.3": [
+                { kodeArkas: "06.05.01", uraian: "Rapat Kerja Penyusunan Kurikulum Satuan Pendidikan (KSP) & Supervisi", sumberDana: "BOSP Reguler", vol: 25, satuan: "Orang/Kegiatan", price: 35000 }
+            ],
+            "D.4": [
+                { kodeArkas: "03.03.11", uraian: "Sosialisasi Pencegahan Perundungan, Kekerasan Seksual & Penguatan TPPK", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1800000 }
+            ],
+            "D.8": [
+                { kodeArkas: "03.03.06", uraian: "Kegiatan Pembinaan Toleransi & Kebinekaan Peserta Didik", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1500000 }
+            ],
+            "D.10": [
+                { kodeArkas: "04.06.04", uraian: "Pelatihan Guru Layanan Pendidikan Inklusif & Akomodasi Layak", sumberDana: "BOSP Reguler", vol: 10, satuan: "Orang/Kegiatan", price: 75000 }
+            ],
+            "D.18": [
+                { kodeArkas: "05.08.12", uraian: "Pengadaan Rambu Jalur Evakuasi, Titik Kumpul & Perlengkapan P3K SPAB", sumberDana: "BOSP Reguler", vol: 1, satuan: "Paket", price: 2250000 },
+                { kodeArkas: "03.03.15", uraian: "Simulasi Tanggap Darurat Bencana Warga Satuan Pendidikan (SPAB)", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1250000 }
+            ],
+            "E.1": [
+                { kodeArkas: "06.05.08", uraian: "Rapat Koordinasi Komite Sekolah & Orang Tua Murid (Parenting PBD)", sumberDana: "BOSP Reguler", vol: 40, satuan: "Orang/Kegiatan", price: 25000 }
+            ],
+            "E.5": [
+                { kodeArkas: "06.05.04", uraian: "Penyusunan & Pencetakan Poster Tata Tertib / Kebijakan Anti Kekerasan", sumberDana: "BOSP Reguler", vol: 10, satuan: "Buah", price: 85000 }
+            ],
+            "E.6": [
+                { kodeArkas: "05.02.01", uraian: "Pengadaan Buku Teks Utama Pendamping Kurikulum (SIPLah)", sumberDana: "BOSP Reguler", vol: 80, satuan: "Eksemplar", price: 55000 }
+            ]
+        };
+
         // Filter Kode Khusus SMK agar tidak masuk ke jenjang SMP/SD/SMA/PAUD
         const SMK_ONLY_CODES = ["A.4", "A.5", "A.6", "A.7", "D.17"];
 
@@ -1115,7 +1172,7 @@
             const t = document.getElementById('syncToast');
             document.getElementById('syncToastText').textContent = msg;
             t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3500);
+            setTimeout(() => t.style.display = 'none', 3800);
         }
 
         function cleanNonJenjangIndicators() {
@@ -1690,15 +1747,218 @@
         }
 
         function autoSuggestRkt() {
-            schoolData.rkt = [
-                { bidang: "Standar Proses & SKL", program: "Penguatan Literasi & Numerasi", kegiatan: "Optimalisasi Komunitas Belajar (Kombel) Guru & Pembelajaran Kontekstual", pj: "Wakasek Kurikulum", waktu: "Juli - Oktober 2026", target: "Skor Literasi & Numerasi Meningkat Minimal +5 Poin" },
-                { bidang: "Standar SKL (Karakter)", program: "Penguatan Karakter & Budaya Positif", kegiatan: "Pembiasaan Karakter Profil Pelajar & Pencegahan Perundungan (TPPK)", pj: "Wakasek Kesiswaan", waktu: "Semester 1 & 2", target: "Iklim Keamanan & Karakter Kategori Baik" },
-                { bidang: "Standar Sarana & Prasarana", program: "Satuan Pendidikan Aman Bencana (SPAB)", kegiatan: "Simulasi Tanggap Bencana & Kelengkapan Rambu Evakuasi Sekolah", pj: "Wakasek Sarpras", waktu: "Agustus 2026", target: "Tersedia SOP & Jalur Evakuasi Standar SPAB" },
-                { bidang: "Standar Sarana & Prasarana", program: "Pengembangan Koleksi Perpustakaan", kegiatan: "Pengadaan Buku Teks Utama dan Buku Bacaan Bermutu via SIPLah", pj: "Kepala Perpustakaan", waktu: "Juli - Agustus 2026", target: "Rasio Buku Murid Tercukupi 100%" }
-            ];
+            const prioInds = (schoolData.indicators || []).filter(i => i.capaian !== 'Baik');
+            const generatedRkt = [];
+
+            prioInds.forEach(ind => {
+                const code = String(ind.code || "").trim().toUpperCase();
+                if (code === "A.1") {
+                    generatedRkt.push({
+                        bidang: "1. Standar Kompetensi Lulusan (SKL)",
+                        program: "Penguatan Kemampuan Literasi Murid (A.1)",
+                        kegiatan: "Optimalisasi Kombel Literasi & Pojok Baca Kelas Terintegrasi Pembelajaran",
+                        pj: "Wakasek Kurikulum & Kepala Perpustakaan",
+                        waktu: "Juli - Oktober 2026",
+                        target: "Skor Kemampuan Literasi (A.1) Meningkat Minimal +5 Poin"
+                    });
+                } else if (code === "A.2") {
+                    generatedRkt.push({
+                        bidang: "1. Standar Kompetensi Lulusan (SKL)",
+                        program: "Penguatan Kemampuan Numerasi Murid (A.2)",
+                        kegiatan: "IHT Pembelajaran Numerasi Kontekstual & Pemanfaatan Alat Peraga Matematika",
+                        pj: "Wakasek Kurikulum",
+                        waktu: "Juli - Oktober 2026",
+                        target: "Skor Kemampuan Numerasi (A.2) Meningkat Minimal +5 Poin"
+                    });
+                } else if (code === "A.3") {
+                    generatedRkt.push({
+                        bidang: "1. Standar Kompetensi Lulusan (SKL)",
+                        program: "Penguatan Karakter & Profil Pelajar (A.3)",
+                        kegiatan: "Gelar Karya Kokurikuler & Pembiasaan Karakter Mandiri / Gotong Royong",
+                        pj: "Wakasek Kesiswaan",
+                        waktu: "Semester 1 & 2",
+                        target: "Skor Karakter (A.3) Mencapai Kategori Baik"
+                    });
+                } else if (code === "D.1") {
+                    generatedRkt.push({
+                        bidang: "3. Standar Proses",
+                        program: "Peningkatan Kualitas Pembelajaran Interaktif (D.1)",
+                        kegiatan: "IHT Penyusunan Modul Ajar Berdiferensiasi & Supervisi Akademik Kelas",
+                        pj: "Wakasek Kurikulum",
+                        waktu: "Juli - September 2026",
+                        target: "100% Guru Menerapkan Pembelajaran Interaktif Berdiferensiasi"
+                    });
+                } else if (code === "D.4") {
+                    generatedRkt.push({
+                        bidang: "6. Standar Sarana & Prasarana",
+                        program: "Penguatan Iklim Keamanan Satuan Pendidikan (D.4)",
+                        kegiatan: "Sosialisasi Pencegahan Perundungan & Optimalisasi Tim TPPK Sekolah",
+                        pj: "Wakasek Kesiswaan & Tim TPPK",
+                        waktu: "Agustus 2026",
+                        target: "Zero Perundungan & Iklim Keamanan Kategori Baik"
+                    });
+                } else if (code === "D.18") {
+                    generatedRkt.push({
+                        bidang: "6. Standar Sarana & Prasarana",
+                        program: "Satuan Pendidikan Aman Bencana / SPAB (D.18)",
+                        kegiatan: "Simulasi Tanggap Bencana & Kelengkapan Rambu Evakuasi serta P3K SPAB",
+                        pj: "Wakasek Sarpras & Tim SPAB",
+                        waktu: "Agustus - September 2026",
+                        target: "Tersedia SOP & Jalur Evakuasi Standar SPAB (D.18)"
+                    });
+                } else if (code === "E.6") {
+                    generatedRkt.push({
+                        bidang: "6. Standar Sarana & Prasarana",
+                        program: "Pemenuhan Ketersediaan & Pengadaan Buku Pendidikan (E.6)",
+                        kegiatan: "Pengadaan Buku Teks Utama dan Buku Bacaan Bermutu via SIPLah",
+                        pj: "Kepala Perpustakaan",
+                        waktu: "Juli - Agustus 2026",
+                        target: "Rasio Ketersediaan Buku Murid (E.6) Tercukupi 100%"
+                    });
+                } else {
+                    const shortTitle = getShortIndicatorCaption(ind).replace(/^[A-E]\.\d+\s+/, '');
+                    generatedRkt.push({
+                        bidang: ind.snp || "3. Standar Proses",
+                        program: `Pembenahan ${shortTitle} (${code})`,
+                        kegiatan: `Pendampingan & Optimalisasi Program ${shortTitle} di Satuan Pendidikan`,
+                        pj: "Wakasek Kurikulum",
+                        waktu: "Semester 1 & 2",
+                        target: `Capaian Indikator ${code} Meningkat ke Kategori Baik`
+                    });
+                }
+            });
+
+            if (generatedRkt.length > 0) {
+                schoolData.rkt = generatedRkt;
+            } else {
+                schoolData.rkt = [
+                    { bidang: "3. Standar Proses & SKL", program: "Penguatan Literasi & Numerasi", kegiatan: "Optimalisasi Komunitas Belajar (Kombel) Guru & Pembelajaran Kontekstual", pj: "Wakasek Kurikulum", waktu: "Juli - Oktober 2026", target: "Skor Literasi & Numerasi Meningkat Minimal +5 Poin" },
+                    { bidang: "1. Standar SKL (Karakter)", program: "Penguatan Karakter & Budaya Positif", kegiatan: "Pembiasaan Karakter Profil Pelajar & Pencegahan Perundungan (TPPK)", pj: "Wakasek Kesiswaan", waktu: "Semester 1 & 2", target: "Iklim Keamanan & Karakter Kategori Baik" }
+                ];
+            }
             persist();
             renderRktTable();
-            showToast("Rekomendasi Kegiatan RKT Diterapkan!");
+            showToast("Rekomendasi Kegiatan RKT Sinkron Rapor Diterapkan!");
+        }
+
+        /* ----------------------------------------------------
+           AI GENERATIF TAHAP 4: SINKRONISASI RAPOR & RKT KE ARKAS
+        ---------------------------------------------------- */
+        function autoGenerateArkasFromRaporAndRkt(silent = false) {
+            const generatedArkas = [];
+            const usedCodes = new Set();
+
+            // 1. Sinkronisasi langsung berdasarkan indikator prioritas Rapor Pendidikan (Kurang / Sedang)
+            const prioInds = (schoolData.indicators || []).filter(i => i.capaian !== 'Baik');
+
+            prioInds.forEach(ind => {
+                const code = String(ind.code || "").trim().toUpperCase();
+                const shortTitle = getShortIndicatorCaption(ind).replace(/^[A-E]\.\d+\s+/, '');
+                
+                // Cari kegiatan RKT yang relevan sebagai rujukan kolom Kegiatan Benahi (RKT)
+                const matchedRkt = (schoolData.rkt || []).find(r =>
+                    r.program.toUpperCase().includes(code) ||
+                    r.program.toLowerCase().includes(shortTitle.toLowerCase()) ||
+                    r.kegiatan.toLowerCase().includes(shortTitle.toLowerCase())
+                );
+                const kegiatanLabel = matchedRkt
+                    ? matchedRkt.kegiatan
+                    : `Pembenahan ${shortTitle} (${code})`;
+
+                const templates = ARKAS_PBD_TEMPLATES[code];
+                if (templates && templates.length > 0) {
+                    templates.forEach(tpl => {
+                        generatedArkas.push({
+                            kegiatanRkt: kegiatanLabel,
+                            kodeArkas: tpl.kodeArkas,
+                            uraian: tpl.uraian,
+                            sumberDana: tpl.sumberDana,
+                            vol: tpl.vol,
+                            satuan: tpl.satuan,
+                            price: tpl.price,
+                            total: tpl.vol * tpl.price
+                        });
+                    });
+                    usedCodes.add(code);
+                } else {
+                    generatedArkas.push({
+                        kegiatanRkt: kegiatanLabel,
+                        kodeArkas: "04.06.01",
+                        uraian: `Konsumsi & ATK Pendampingan Peningkatan ${shortTitle} (${code})`,
+                        sumberDana: "BOSP Reguler",
+                        vol: 25,
+                        satuan: "Orang/Kegiatan",
+                        price: 35000,
+                        total: 875000
+                    });
+                    usedCodes.add(code);
+                }
+            });
+
+            // 2. Jika ada baris RKT tambahan yang belum terwakili oleh kode indikator di atas, buatkan item ARKAS-nya
+            (schoolData.rkt || []).forEach(r => {
+                const alreadyCovered = generatedArkas.some(a => a.kegiatanRkt === r.kegiatan);
+                if (!alreadyCovered) {
+                    const lowerText = `${r.bidang} ${r.program} ${r.kegiatan}`.toLowerCase();
+                    let kodeArkas = "04.06.01";
+                    let uraian = `Konsumsi, ATK & Penggandaan Materi ${r.kegiatan}`;
+                    let vol = 25;
+                    let satuan = "Orang/Kegiatan";
+                    let price = 35000;
+
+                    if (lowerText.includes("buku") || lowerText.includes("perpustakaan") || lowerText.includes("siplah")) {
+                        kodeArkas = "05.02.01";
+                        uraian = `Pengadaan Buku Teks Utama & Bacaan Bermutu (${r.program})`;
+                        vol = 60;
+                        satuan = "Eksemplar";
+                        price = 50000;
+                    } else if (lowerText.includes("bencana") || lowerText.includes("spab") || lowerText.includes("evakuasi")) {
+                        kodeArkas = "05.08.12";
+                        uraian = `Pengadaan Rambu Evakuasi & Perlengkapan Mitigasi Bencana (${r.program})`;
+                        vol = 1;
+                        satuan = "Paket";
+                        price = 2000000;
+                    } else if (lowerText.includes("karakter") || lowerText.includes("kokurikuler") || lowerText.includes("perundungan")) {
+                        kodeArkas = "03.03.04";
+                        uraian = `Pelaksanaan Kegiatan Pembinaan Karakter & Kokurikuler (${r.program})`;
+                        vol = 1;
+                        satuan = "Kegiatan";
+                        price = 2000000;
+                    }
+
+                    generatedArkas.push({
+                        kegiatanRkt: r.kegiatan,
+                        kodeArkas: kodeArkas,
+                        uraian: uraian,
+                        sumberDana: "BOSP Reguler",
+                        vol: vol,
+                        satuan: satuan,
+                        price: price,
+                        total: vol * price
+                    });
+                }
+            });
+
+            // Fallback jika seluruh indikator sudah Baik dan RKT kosong
+            if (generatedArkas.length === 0) {
+                generatedArkas.push({
+                    kegiatanRkt: "Optimalisasi Komunitas Belajar (Kombel) Guru",
+                    kodeArkas: "04.06.01",
+                    uraian: "Konsumsi & ATK Kegiatan Komunitas Belajar Guru",
+                    sumberDana: "BOSP Reguler",
+                    vol: 30,
+                    satuan: "Orang/Kegiatan",
+                    price: 35000,
+                    total: 1050000
+                });
+            }
+
+            schoolData.arkas = generatedArkas;
+            persist();
+            renderArkasTable();
+            if (!silent) {
+                showToast(`AI Berhasil Menyusun ${generatedArkas.length} Rincian Anggaran ARKAS Tersinkron Rapor & RKT!`);
+            }
         }
 
         function renderArkasTable() {
@@ -1743,8 +2003,9 @@
         }
 
         function addArkasRow() {
+            const defaultRkt = (schoolData.rkt && schoolData.rkt[0]) ? schoolData.rkt[0].kegiatan : "Workshop Komunitas Belajar Guru";
             schoolData.arkas.push({
-                kegiatanRkt: "Workshop Komunitas Belajar Guru",
+                kegiatanRkt: defaultRkt,
                 kodeArkas: "04.06.01",
                 uraian: "Konsumsi & ATK Kegiatan Kombel Guru",
                 sumberDana: "BOSP Reguler",
@@ -1994,7 +2255,6 @@
                                         }
                                     }
 
-                                    // Filter sesuai jenjang (abaikan A.4 - A.7 SMK jika jenjang SMP)
                                     if (!isIndicatorAllowedForJenjang(cellCode, indName, currentJenjang)) {
                                         continue;
                                     }
@@ -2019,15 +2279,17 @@
                         schoolData.indicators = Array.from(extractedMap.values());
                     }
 
+                    // Otomatis isi berantai dari Tahap 2 (Refleksi), Tahap 3 (RKT), Tahap 4 (ARKAS), hingga Tahap 5 (Monev)
                     autoGenerateAIReflections();
                     autoSuggestRkt();
+                    autoGenerateArkasFromRaporAndRkt(true);
                     syncMonevFromRKT();
                     persist();
 
                     document.getElementById('aiProcessingState').style.display = 'none';
                     closeAiUploadModal();
                     syncAllUI();
-                    showToast(`Berhasil membaca ${schoolData.indicators.length} indikator jenjang ${currentJenjang}!`);
+                    showToast(`Berhasil membaca ${schoolData.indicators.length} indikator & menyusun Refleksi, RKT, serta ARKAS!`);
                 } catch (err) {
                     alert("Gagal memproses file Excel: " + err.message);
                     document.getElementById('aiProcessingState').style.display = 'none';
