@@ -71,7 +71,7 @@
         .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
         .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
-        .grid-2-1 { display: grid; grid-template-columns: 1.4fr 1fr; gap: 20px; }
+        .grid-2-1 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .grid-2-1 { grid-template-columns: 1fr; } }
 
         /* Form Controls */
@@ -471,15 +471,19 @@
             </div>
 
             <div class="grid-2-1">
-                <div class="card">
-                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
-                        <h3 style="font-size: 14px; font-weight: 700;">Grafik Radar Profil Mutu Satuan Pendidikan</h3>
-                        <span id="radarSubtitleBadge" class="badge badge-blue">Jenjang SMP</span>
+                <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
+                    <div>
+                        <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                            <h3 style="font-size: 14px; font-weight: 700;">Grafik Radar Profil Mutu Satuan Pendidikan</h3>
+                            <span id="radarSubtitleBadge" class="badge badge-blue">SMPN 3 Tarogong Kidul (SMP)</span>
+                        </div>
+                        <div style="height: 360px; position: relative;">
+                            <canvas id="radarChart"></canvas>
+                        </div>
                     </div>
-                    <div style="height: 360px; position: relative;">
-                        <canvas id="radarChart"></canvas>
-                    </div>
-                    <div id="radarLegendDetails" style="margin-top: 12px; padding-top: 12px; border-top: 1px solid #e2e8f0; display: flex; flex-direction: column; gap: 6px;"></div>
+                    <p style="font-size: 11px; color: #64748b; margin-top: 8px; text-align: center;">
+                        💡 Arahkan kursor / sentuh titik pada grafik untuk melihat rincian deskripsi lengkap tiap kode indikator.
+                    </p>
                 </div>
 
                 <div class="card" style="display: flex; flex-direction: column; justify-content: space-between;">
@@ -848,69 +852,90 @@
             "8. Standar Pembiayaan"
         ];
 
-        // Kamus Indikator Lengkap Resmi Rapor Pendidikan (Dikdasmen)
+        // Kamus Indikator Lengkap & Klu Judul Singkat Resmi Rapor Pendidikan (Dikdasmen)
         const INDICATOR_SNP_DICTIONARY = {
             "A.1": {
+                short: "Kemampuan Literasi",
                 name: "Kemampuan Literasi — Persentase murid berdasarkan kemampuan dalam memahami, menggunakan, merefleksi, dan mengevaluasi beragam jenis teks (teks informasional dan teks fiksi).",
                 snp: "1. Standar Kompetensi Lulusan (SKL)"
             },
             "A.2": {
+                short: "Kemampuan Numerasi",
                 name: "Kemampuan Numerasi — Persentase murid berdasarkan kemampuan dalam berpikir menggunakan konsep, prosedur, fakta, dan alat matematika untuk menyelesaikan masalah sehari-hari.",
                 snp: "1. Standar Kompetensi Lulusan (SKL)"
             },
             "A.3": {
+                short: "Karakter",
                 name: "Karakter — Nilai rerata karakter murid berdasarkan nilai Keimanan dan Ketakwaan terhadap Tuhan Yang Maha Esa, Kewargaan, Penalaran Kritis, Kreativitas, Kolaborasi, Kemandirian, Kesehatan, dan Komunikasi pada survei karakter.",
                 snp: "1. Standar Kompetensi Lulusan (SKL)"
             },
             "C.1": {
+                short: "Proporsi GTK Bersertifikat",
                 name: "Proporsi GTK Bersertifikat — Persentase guru dan kepala sekolah yang memiliki sertifikat pendidik di satuan pendidikan.",
                 snp: "5. Standar Pendidik & Tenaga Kependidikan"
             },
             "C.3": {
+                short: "Pengalaman Pelatihan GTK",
                 name: "Pengalaman Pelatihan GTK — Persentase guru yang pernah mengikuti pelatihan pengetahuan bidang studi, pedagogi, manajerial, atau pelatihan lain melalui platform/lembaga resmi.",
                 snp: "5. Standar Pendidik & Tenaga Kependidikan"
             },
+            "C.4": {
+                short: "Kompetensi Pendidik",
+                name: "Kompetensi Pendidik — Nilai rerata terkait kompetensi pendidik yang terdiri dari kompetensi pedagogik, kepribadian, sosial, dan profesional dalam melaksanakan tugas dan fungsinya.",
+                snp: "5. Standar Pendidik & Tenaga Kependidikan"
+            },
             "D.1": {
+                short: "Kualitas Pembelajaran",
                 name: "Kualitas Pembelajaran — Kualitas pengelolaan kelas dan penyelenggaraan pembelajaran interaktif yang sesuai dengan tujuan pembelajaran dan karakteristik murid.",
                 snp: "3. Standar Proses"
             },
             "D.2": {
+                short: "Refleksi & Perbaikan Pembelajaran",
                 name: "Refleksi dan Perbaikan Pembelajaran oleh Guru — Tingkat aktivitas refleksi dan perbaikan praktik pembelajaran yang dilakukan oleh guru secara mandiri maupun melalui komunitas belajar.",
                 snp: "3. Standar Proses"
             },
             "D.3": {
+                short: "Kepemimpinan Instruksional",
                 name: "Kepemimpinan Instruksional — Tingkat kepemimpinan kepala satuan pendidikan dalam menyusun dan mengomunikasikan visi-misi, pengembangan kurikulum, serta dukungan perbaikan pembelajaran.",
                 snp: "7. Standar Pengelolaan"
             },
             "D.4": {
+                short: "Iklim Keamanan Satuan Pendidikan",
                 name: "Iklim Keamanan Satuan Pendidikan — Tingkat rasa aman dan kenyamanan murid dari perundungan, hukuman fisik, kekerasan seksual, dan penyalahgunaan narkoba di lingkungan sekolah.",
                 snp: "6. Standar Sarana & Prasarana"
             },
             "D.8": {
+                short: "Iklim Kebinekaan",
                 name: "Iklim Kebinekaan — Kondisi satuan pendidikan yang menunjukkan sikap dan perilaku kepala sekolah serta guru dalam menerapkan toleransi agama dan budaya serta komitmen kebangsaan.",
                 snp: "3. Standar Proses"
             },
             "D.10": {
+                short: "Iklim Inklusivitas",
                 name: "Iklim Inklusivitas — Tingkat layanan pendidikan dan dukungan satuan pendidikan terhadap murid penyandang disabilitas serta murid cerdas istimewa bakat istimewa.",
                 snp: "3. Standar Proses"
             },
             "D.18": {
+                short: "Kesiapsiagaan Bencana (SPAB)",
                 name: "Kesiapsiagaan Bencana (SPAB) — Tingkat pengetahuan, keterampilan, dan kesiapan warga satuan pendidikan serta ketersediaan fasilitas pendukung dalam menghadapi risiko bencana.",
                 snp: "6. Standar Sarana & Prasarana"
             },
             "E.1": {
+                short: "Partisipasi Warga Sekolah",
                 name: "Partisipasi Warga Satuan Pendidikan — Tingkat keterlibatan orang tua/wali murid dan peserta didik dalam perencanaan, pengembangan, dan pelaksanaan aktivitas di satuan pendidikan.",
                 snp: "7. Standar Pengelolaan"
             },
             "E.2": {
+                short: "Pemanfaatan Sumber Daya Sekolah",
                 name: "Proporsi Pemanfaatan Sumber Daya Sekolah untuk Peningkatan Mutu — Persentase pembelanjaan dana BOSP untuk pengembangan perpustakaan, kegiatan pembelajaran/ekstrakurikuler, dan peningkatan mutu GTK.",
                 snp: "8. Standar Pembiayaan"
             },
             "E.5": {
+                short: "Program & Kebijakan Sekolah",
                 name: "Program dan Kebijakan Satuan Pendidikan — Tingkat ketersediaan dan penerapan program serta kebijakan sekolah untuk mencegah perundungan, kekerasan seksual, intoleransi, dan rokok/napza.",
                 snp: "7. Standar Pengelolaan"
             },
             "E.6": {
+                short: "Ketersediaan & Pengadaan Buku",
                 name: "Ketersediaan & Pengadaan Buku Pendidikan — Tingkat kecukupan buku teks utama dan buku bacaan bermutu yang tersedia bagi murid dan guru di satuan pendidikan.",
                 snp: "6. Standar Sarana & Prasarana"
             }
@@ -929,6 +954,26 @@
                 }
             }
             return true;
+        }
+
+        // Mengambil klu/caption singkat yang utuh (tidak terpotong hurufnya) untuk Grafik Radar
+        function getShortIndicatorCaption(ind) {
+            const code = String(ind.code || "").trim().toUpperCase();
+            if (INDICATOR_SNP_DICTIONARY[code] && INDICATOR_SNP_DICTIONARY[code].short) {
+                return `${code} ${INDICATOR_SNP_DICTIONARY[code].short}`;
+            }
+            let rawName = String(ind.name || "").trim();
+            if (rawName.includes("—")) {
+                rawName = rawName.split("—")[0].trim();
+            } else if (rawName.includes(" - ")) {
+                rawName = rawName.split(" - ")[0].trim();
+            } else {
+                const splitMatch = rawName.match(/^(.+?)\s+(?:Persentase|Nilai rerata|Tingkat|Kualitas|Kondisi|Proporsi)\b/i);
+                if (splitMatch && splitMatch[1].length >= 5) {
+                    rawName = splitMatch[1].trim();
+                }
+            }
+            return `${code} ${rawName}`;
         }
 
         let schoolData = {
@@ -979,7 +1024,6 @@
                     const parsed = JSON.parse(raw);
                     if (parsed && parsed.schoolName) {
                         schoolData = { ...schoolData, ...parsed };
-                        // Bersihkan otomatis jika sebelumnya sempat tersedot URL atau indikator SMK
                         if (String(schoolData.schoolName).startsWith("http")) {
                             schoolData.schoolName = "SMPN 3 Tarogong Kidul";
                         }
@@ -1003,7 +1047,6 @@
             const beforeCount = schoolData.indicators.length;
             schoolData.indicators = schoolData.indicators.filter(ind => {
                 if (!isIndicatorAllowedForJenjang(ind.code, ind.name, jenjang)) return false;
-                // Lengkapi kalimat deskripsi jika masih singkat dan tersedia di kamus
                 if (INDICATOR_SNP_DICTIONARY[ind.code] && ind.name.length < 40) {
                     ind.name = INDICATOR_SNP_DICTIONARY[ind.code].name;
                 }
@@ -1014,7 +1057,7 @@
             syncAllUI();
             showToast(removed > 0
                 ? `${removed} indikator di luar jenjang ${jenjang} berhasil dihapus & kalimat dilengkapi!`
-                : `Seluruh indikator sudah sesuai jenjang ${jenjang} dengan kalimat lengkap!`);
+                : `Seluruh indikator sudah sesuai jenjang ${jenjang}!`);
         }
 
         function handlePrintDocument() {
@@ -1046,7 +1089,7 @@
             const numObj = schoolData.indicators.find(i => i.code === 'A.2');
             const litStr = litObj ? `${litObj.skor} (${litObj.capaian})` : '-';
             const numStr = numObj ? `${numObj.skor} (${numObj.capaian})` : '-';
-            const prioList = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => `${i.code} ${i.name.split('—')[0].trim()}`).slice(0, 3).join(', ') || 'Terpenuhi';
+            const prioList = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => getShortIndicatorCaption(i)).slice(0, 3).join(', ') || 'Terpenuhi';
             const totArkas = (schoolData.arkas || []).reduce((acc, a) => acc + ((parseFloat(a.vol) || 0) * (parseFloat(a.price) || 0)), 0);
 
             return [
@@ -1298,9 +1341,9 @@
         }
 
         /* ----------------------------------------------------
-           HELPER PEMBUNGKUS KALIMAT LENGKAP UNTUK RADAR
+           HELPER PEMBUNGKUS KALIMAT UNTUK RADAR
         ---------------------------------------------------- */
-        function wrapRadarLabel(fullText, maxCharsPerLine = 32) {
+        function wrapRadarLabel(fullText, maxCharsPerLine = 24) {
             const words = String(fullText || "").split(/\s+/);
             const lines = [];
             let currentLine = "";
@@ -1366,7 +1409,7 @@
                 grid.appendChild(card);
             });
 
-            // Priority List
+            // Priority List (Sebelah Kanan — Kalimat Lengkap & Badge Rapi Tidak Terpotong)
             const prioContainer = document.getElementById('priorityListDashboard');
             prioContainer.innerHTML = '';
             const prioList = inds.filter(i => i.capaian !== 'Baik').slice(0, 5);
@@ -1375,54 +1418,56 @@
             } else {
                 prioList.forEach(p => {
                     prioContainer.innerHTML += `
-                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px; border-radius:8px; display:flex; justify-content:space-between; align-items:flex-start; gap:8px;">
-                            <div>
-                                <div style="font-weight:700; font-size:12px; line-height:1.4; color:#0f172a;">${esc(p.code)} - ${esc(p.name)}</div>
-                                <div style="font-size:10px; color:#64748b; margin-top:4px;">${esc(p.snp)}</div>
+                        <div style="background:#f8fafc; border:1px solid #e2e8f0; padding:10px 12px; border-radius:8px; display:flex; flex-direction:column; gap:6px;">
+                            <div style="display:flex; justify-content:space-between; align-items:center; gap:8px;">
+                                <span style="font-size:10px; font-weight:700; color:#0f766e;">${esc(p.snp)}</span>
+                                <span class="badge ${p.capaian === 'Kurang' ? 'badge-rose' : 'badge-amber'}">${esc(p.capaian)} (${p.skor})</span>
                             </div>
-                            <span class="badge ${p.capaian === 'Kurang' ? 'badge-rose' : 'badge-amber'}">${esc(p.capaian)} (${p.skor})</span>
+                            <div style="font-weight:600; font-size:12px; line-height:1.45; color:#0f172a;">
+                                <strong>${esc(p.code)}</strong> - ${esc(p.name)}
+                            </div>
                         </div>
                     `;
                 });
             }
 
-            // Radar Chart (Kalimat Lengkap & Rapi)
+            // Radar Chart (Klu Caption Singkat Utuh Tanpa Terpotong)
             const radarSlice = inds.slice(0, 6);
-            const legendBox = document.getElementById('radarLegendDetails');
-            if (legendBox) {
-                legendBox.innerHTML = `<div style="font-size:11px; font-weight:700; color:#475569; margin-bottom:2px;">Keterangan Kalimat Lengkap Indikator pada Grafik Radar:</div>` +
-                    radarSlice.map(i => `
-                        <div style="font-size:11px; color:#334155; line-height:1.4; background:#f8fafc; padding:6px 8px; border-radius:6px; border-left:3px solid #0d9488;">
-                            <strong style="color:#0f766e;">${esc(i.code)}</strong>: ${esc(i.name)} <span style="font-weight:700; color:#0f172a;">(Skor: ${i.skor})</span>
-                        </div>
-                    `).join('');
-            }
-
             const ctx = document.getElementById('radarChart');
             if (!ctx || typeof Chart === 'undefined') return;
             if (radarChartInstance) radarChartInstance.destroy();
             radarChartInstance = new Chart(ctx, {
                 type: 'radar',
                 data: {
-                    labels: radarSlice.map(i => wrapRadarLabel(`${i.code} ${i.name}`, 34)),
+                    labels: radarSlice.map(i => wrapRadarLabel(getShortIndicatorCaption(i), 22)),
                     datasets: [{
                         label: `Capaian ${schoolData.schoolName}`,
                         data: radarSlice.map(i => i.skor),
-                        backgroundColor: 'rgba(13, 148, 136, 0.2)',
+                        backgroundColor: 'rgba(13, 148, 136, 0.22)',
                         borderColor: '#0d9488',
-                        pointBackgroundColor: '#0d9488'
+                        borderWidth: 2,
+                        pointBackgroundColor: '#0d9488',
+                        pointRadius: 4
                     }]
                 },
                 options: {
                     responsive: true,
                     maintainAspectRatio: false,
+                    layout: {
+                        padding: { top: 8, bottom: 8, left: 12, right: 12 }
+                    },
                     plugins: {
                         tooltip: {
                             callbacks: {
                                 title: function(items) {
                                     const idx = items[0].dataIndex;
                                     const item = radarSlice[idx];
-                                    return item ? `${item.code} - ${item.name}` : '';
+                                    return item ? getShortIndicatorCaption(item) : '';
+                                },
+                                afterBody: function(items) {
+                                    const idx = items[0].dataIndex;
+                                    const item = radarSlice[idx];
+                                    return item ? wrapRadarLabel(item.name, 48) : [];
                                 }
                             }
                         }
@@ -1433,8 +1478,9 @@
                             max: 100,
                             ticks: { stepSize: 20, display: false },
                             pointLabels: {
-                                font: { size: 10, weight: '600' },
-                                color: '#1e293b'
+                                font: { size: 11, weight: '700' },
+                                color: '#1e293b',
+                                padding: 8
                             }
                         }
                     }
@@ -1489,7 +1535,7 @@
                 tr.innerHTML = `
                     <td>
                         <select class="form-control" style="font-size:11px;" onchange="setField('reflections',${idx},'indicator',this.value)">
-                            ${schoolData.indicators.map(i => `<option value="${i.code} ${i.name}" ${ref.indicator.includes(i.code) ? 'selected' : ''}>${i.code} - ${i.name.split('—')[0].trim()}</option>`).join('')}
+                            ${schoolData.indicators.map(i => `<option value="${i.code} ${i.name}" ${ref.indicator.includes(i.code) ? 'selected' : ''}>${getShortIndicatorCaption(i)}</option>`).join('')}
                         </select>
                     </td>
                     ${ce('reflections', idx, 'fact', ref.fact)}
@@ -1515,7 +1561,7 @@
 
         function autoGenerateAIReflections() {
             schoolData.reflections = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => {
-                const shortTitle = i.name.split('—')[0].trim();
+                const shortTitle = getShortIndicatorCaption(i).replace(/^[A-E]\.\d+\s+/, '');
                 return {
                     indicator: `${i.code} ${i.name}`,
                     fact: `Skor ${i.skor} (${i.capaian}) pada Rapor Pendidikan ${schoolData.schoolName}.`,
@@ -1686,8 +1732,8 @@
             document.getElementById('repKepsekPrint').textContent = schoolData.kepsekName || "( ________________________ )";
             document.getElementById('repKepsekNipPrint').textContent = schoolData.kepsekNIP ? `NIP. ${schoolData.kepsekNIP}` : "NIP. ........................................";
 
-            const kuat = schoolData.indicators.filter(i => i.capaian === 'Baik').map(i => i.name.split('—')[0].trim()).join(', ') || 'indikator standar';
-            const benahi = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => i.name.split('—')[0].trim()).join(', ') || 'peningkatan berkelanjutan';
+            const kuat = schoolData.indicators.filter(i => i.capaian === 'Baik').map(i => getShortIndicatorCaption(i).replace(/^[A-E]\.\d+\s+/, '')).join(', ') || 'indikator standar';
+            const benahi = schoolData.indicators.filter(i => i.capaian !== 'Baik').map(i => getShortIndicatorCaption(i).replace(/^[A-E]\.\d+\s+/, '')).join(', ') || 'peningkatan berkelanjutan';
 
             document.getElementById('repExecSummary').innerHTML = `
                 Dokumen Evaluasi Diri Satuan Pendidikan (EDS) dan Perencanaan Berbasis Data (PBD) <strong>${esc(schoolData.schoolName)}</strong> 
@@ -1782,7 +1828,10 @@
                 </div>
             `).join('') : '<div style="color:#059669; font-weight:600;">✓ Kondisi standar ini baik / belum ada catatan masalah.</div>';
 
-            const rkts = schoolData.rkt.filter(r => inds.some(i => r.program.toLowerCase().includes(i.name.split('—')[0].trim().toLowerCase()) || r.kegiatan.toLowerCase().includes(i.name.split('—')[0].trim().toLowerCase())));
+            const rkts = schoolData.rkt.filter(r => inds.some(i => {
+                const shortTitle = getShortIndicatorCaption(i).replace(/^[A-E]\.\d+\s+/, '').toLowerCase();
+                return r.program.toLowerCase().includes(shortTitle) || r.kegiatan.toLowerCase().includes(shortTitle);
+            }));
             document.getElementById('snpModalRktBody').innerHTML = rkts.length ? rkts.map(r => `
                 <tr>
                     <td style="font-weight:700;">${esc(r.program)}</td>
@@ -1866,7 +1915,6 @@
                                     }
 
                                     const dict = INDICATOR_SNP_DICTIONARY[cellCode] || { name: indName || `Indikator ${cellCode}`, snp: STANDAR_NASIONAL_PENDIDIKAN[0] };
-                                    // Gunakan kalimat lengkap dari kamus jika tersedia, atau gabungkan dengan teks Excel
                                     const fullDisplayName = dict.name || indName;
                                     const finalSkor = skorVal !== null ? skorVal : 65.0;
                                     const finalCap = capaianVal || (finalSkor >= 70 ? "Baik" : (finalSkor >= 50 ? "Sedang" : "Kurang"));
