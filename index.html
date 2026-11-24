@@ -87,7 +87,7 @@
         .card { background-color: white; border: 1px solid #e2e8f0; border-radius: 12px; padding: 20px; box-shadow: 0 1px 3px rgba(0,0,0,0.05); margin-bottom: 20px; }
         .grid-5 { display: grid; grid-template-columns: repeat(auto-fit, minmax(190px, 1fr)); gap: 16px; }
         .grid-4 { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: 16px; }
-        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(280px, 1fr)); gap: 16px; }
+        .grid-3 { display: grid; grid-template-columns: repeat(auto-fit, minmax(260px, 1fr)); gap: 14px; }
         .grid-2-1 { display: grid; grid-template-columns: 1.35fr 1fr; gap: 20px; }
         @media (max-width: 900px) { .grid-2-1 { grid-template-columns: 1fr; } }
 
@@ -148,6 +148,14 @@
         .stat-value { font-size: calc(22px * var(--ui-scale)); font-weight: 800; margin-top: 4px; }
         .stat-sub { font-size: calc(11px * var(--ui-scale)); color: #475569; margin-top: 2px; }
         .stat-icon { width: 44px; height: 44px; border-radius: 8px; display: flex; align-items: center; justify-content: center; font-size: 20px; flex-shrink: 0; }
+
+        /* BOSP Compliance Quota Box */
+        .quota-pill { background: white; border: 1px solid #cbd5e1; border-radius: 8px; padding: 10px 12px; display: flex; flex-direction: column; gap: 4px; }
+        .quota-pill.ok { border-color: #6ee7b7; background: #ecfdf5; }
+        .quota-pill.warn { border-color: #fca5a5; background: #fef2f2; }
+        .quota-header { display: flex; justify-content: space-between; align-items: center; gap: 6px; font-size: calc(11px * var(--ui-scale)); font-weight: 700; color: #334155; }
+        .quota-val { font-size: calc(14px * var(--ui-scale)); font-weight: 800; color: #0f172a; }
+        .quota-note { font-size: calc(11px * var(--ui-scale)); font-weight: 600; }
 
         /* 8 SNP Grid Items */
         .snp-card { border: 1px solid #e2e8f0; border-radius: 8px; padding: 12px; background: #f8fafc; font-size: calc(12px * var(--ui-scale)); cursor: pointer; transition: all 0.2s; position: relative; }
@@ -372,7 +380,7 @@
                     <div style="width: 40px; height: 40px; border-radius: 10px; background: #ccfbf1; color: #0f766e; display: flex; align-items: center; justify-content: center; font-size: 20px; font-weight: bold;">✦</div>
                     <div>
                         <h3 class="section-heading">Unggah File Unduhan Rapor Pendidikan (.xlsx)</h3>
-                        <p class="section-subtext">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>), memetakannya ke 8 SNP, dan menyusun draf Refleksi, RKT, serta RKAS ARKAS.</p>
+                        <p class="section-subtext">Sistem otomatis mengekstrak skor indikator sesuai jenjang (<strong id="modalJenjangLabel">SMP</strong>), memetakannya ke 8 SNP, dan menyusun draf Refleksi, RKT, serta RKAS ARKAS sesuai kuota BOSP Permendikdasmen No. 8/2026.</p>
                     </div>
                 </div>
 
@@ -612,7 +620,7 @@
             </div>
         </div>
 
-        <!-- TAB 4: PERENCANAAN RKT & ARKAS (DENGAN KALKULATOR PAGU BOSP & GENERATOR AI) -->
+        <!-- TAB 4: PERENCANAAN RKT & ARKAS (DENGAN KALKULATOR PAGU BOSP & GENERATOR AI PERMENDIKDASMEN 8/2026) -->
         <div id="tab-benahi" class="tab-content">
             <div class="card">
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 8px;">
@@ -649,18 +657,25 @@
                 <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; flex-wrap: wrap; gap: 12px;">
                     <div>
                         <h3 class="section-heading">Tahap 4: Rancangan Penganggaran ARKAS (RKAS PBD)</h3>
-                        <p class="section-subtext">Rincian belanja yang disinkronkan otomatis dari Rapor Pendidikan & RKT untuk diinput Bendahara BOSP ke aplikasi ARKAS.</p>
+                        <p class="section-subtext">Rincian belanja disinkronkan otomatis dari Rapor & RKT sesuai ketentuan <strong>Permendikdasmen No. 8 Tahun 2026</strong> (Buku Min. 10%, Honor Maks. 20% Negeri / 40% Swasta, Sarpras Ringan-Sedang Maks. 20%).</p>
                     </div>
                     <div style="display:flex; gap:8px; flex-wrap:wrap;">
-                        <button type="button" onclick="autoGenerateArkasFromRaporAndRkt()" class="btn btn-amber" title="Susun otomatis rancangan belanja ARKAS berdasarkan indikator prioritas Rapor Pendidikan & RKT">
-                            ✦ Rekomendasi ARKAS Otomatis (Sinkron Rapor & RKT)
+                        <button type="button" onclick="autoGenerateArkasFromRaporAndRkt()" class="btn btn-amber" title="Susun otomatis rancangan belanja ARKAS berdasarkan Rapor Pendidikan, RKT & kuota BOSP Negeri/Swasta">
+                            ✦ Rekomendasi ARKAS Otomatis (Sinkron Rapor, RKT & Pagu BOSP)
                         </button>
                         <button type="button" onclick="addArkasRow()" class="btn btn-emerald">+ Tambah Rincian Belanja ARKAS</button>
                     </div>
                 </div>
 
-                <!-- Simulasi Pagu BOSP -->
-                <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 14px; margin-bottom: 16px;" class="grid-3">
+                <!-- Simulasi Pagu BOSP & Status Satdik -->
+                <div style="background: #f0fdfa; border: 1px solid #99f6e4; border-radius: 10px; padding: 14px; margin-bottom: 14px;" class="grid-4">
+                    <div class="form-group">
+                        <label style="color: #0f766e;">Status Satuan Pendidikan</label>
+                        <select id="schoolStatusSelect" onchange="updateSchoolStatus(this.value)" class="form-control" style="background: white;">
+                            <option value="Negeri" selected>Sekolah Negeri (Honor Maks. 20%)</option>
+                            <option value="Swasta">Sekolah Swasta (Honor Maks. 40%)</option>
+                        </select>
+                    </div>
                     <div class="form-group">
                         <label style="color: #0f766e;">Total Pagu BOSP Reguler Tahunan (Rp)</label>
                         <input type="number" id="paguBospInput" value="150000000" onchange="updateBospPagu(this.value)" class="form-control" style="background: white;">
@@ -670,8 +685,38 @@
                         <span id="arkasTotalTop" style="font-size: calc(18px * var(--ui-scale)); font-weight: 800; color: #0f172a; margin-top: 4px;">Rp 0</span>
                     </div>
                     <div style="display: flex; flex-direction: column; justify-content: center;">
-                        <span class="stat-title">Sisa Pagu BOSP (Untuk Operasional Rutin)</span>
+                        <span class="stat-title">Sisa Pagu BOSP (Operasional Rutin)</span>
                         <span id="sisaPaguBosp" style="font-size: calc(18px * var(--ui-scale)); font-weight: 800; color: #059669; margin-top: 4px;">Rp 150.000.000</span>
+                    </div>
+                </div>
+
+                <!-- Monitor Kuota 3 Komponen Permendikdasmen No. 8 Tahun 2026 -->
+                <div class="grid-3" style="margin-bottom: 16px;">
+                    <div id="quotaBukuBox" class="quota-pill">
+                        <div class="quota-header">
+                            <span>📚 Penyediaan Buku / Perpus</span>
+                            <span id="quotaBukuTarget" class="badge badge-blue">Min. 10%</span>
+                        </div>
+                        <div id="quotaBukuVal" class="quota-val">Rp 0 (0.0%)</div>
+                        <div id="quotaBukuNote" class="quota-note" style="color:#475569;">Target minimal Rp 15.000.000</div>
+                    </div>
+
+                    <div id="quotaHonorBox" class="quota-pill">
+                        <div class="quota-header">
+                            <span>👨‍🏫 Pembayaran Honorarium</span>
+                            <span id="quotaHonorTarget" class="badge badge-blue">Maks. 20% (Negeri)</span>
+                        </div>
+                        <div id="quotaHonorVal" class="quota-val">Rp 0 (0.0%)</div>
+                        <div id="quotaHonorNote" class="quota-note" style="color:#475569;">Batas maksimal Rp 30.000.000</div>
+                    </div>
+
+                    <div id="quotaSarprasBox" class="quota-pill">
+                        <div class="quota-header">
+                            <span>🛠️ Pemeliharaan Sarpras Ringan-Sedang</span>
+                            <span id="quotaSarprasTarget" class="badge badge-blue">Maks. 20%</span>
+                        </div>
+                        <div id="quotaSarprasVal" class="quota-val">Rp 0 (0.0%)</div>
+                        <div id="quotaSarprasNote" class="quota-note" style="color:#475569;">Batas maksimal Rp 30.000.000</div>
                     </div>
                 </div>
 
@@ -850,7 +895,7 @@
             <div id="docRkasContainer" class="card" style="display:none; max-width: 950px; margin: 0 auto; padding: 32px;">
                 <div style="text-align: center; border-bottom: 2px solid #0f172a; padding-bottom: 14px; margin-bottom: 20px;">
                     <h2 style="font-size: 17px; font-weight: 800; text-transform: uppercase;">LEMBAR RANCANGAN PENGANGGARAN PBD (INPUT ARKAS BOSP)</h2>
-                    <p style="font-size: 13px; font-weight: 700; margin-top: 6px;"><span id="rkasDocSchool">SMPN 3 Tarogong Kidul</span> | Tahun Anggaran <span id="rkasDocYear">2026</span></p>
+                    <p style="font-size: 13px; font-weight: 700; margin-top: 6px;"><span id="rkasDocSchool">SMPN 3 Tarogong Kidul</span> (<span id="rkasDocStatus">Negeri</span>) | Tahun Anggaran <span id="rkasDocYear">2026</span></p>
                 </div>
                 <div class="table-responsive">
                     <table style="border: 1px solid #cbd5e1; font-size: 12px;">
@@ -1022,56 +1067,57 @@
             }
         };
 
-        // Kamus Referensi ARKAS PBD Resmi Kemendikdasmen per Kode Indikator Rapor Pendidikan
+        // Kamus Referensi ARKAS PBD Resmi Kemendikdasmen per Kode Indikator (dengan kategori kuota BOSP Permendikdasmen 8/2026)
+        // category: 'buku' | 'honor' | 'sarpras' | 'operasional'
         const ARKAS_PBD_TEMPLATES = {
             "A.1": [
-                { kodeArkas: "04.06.01", uraian: "Konsumsi & ATK Komunitas Belajar (Kombel) Penguatan Literasi", sumberDana: "BOSP Reguler", vol: 30, satuan: "Orang/Kegiatan", price: 35000 },
-                { kodeArkas: "05.02.04", uraian: "Pengadaan Buku Bacaan Fiksi & Nonfiksi Bermutu Pojok Baca Kelas", sumberDana: "BOSP Reguler", vol: 60, satuan: "Eksemplar", price: 45000 }
+                { kodeArkas: "04.06.01", uraian: "Konsumsi & ATK Komunitas Belajar (Kombel) Penguatan Literasi", sumberDana: "BOSP Reguler", vol: 30, satuan: "Orang/Kegiatan", price: 35000, category: "operasional" },
+                { kodeArkas: "05.02.04", uraian: "Pengadaan Buku Bacaan Fiksi & Nonfiksi Bermutu Pojok Baca Kelas", sumberDana: "BOSP Reguler", vol: 120, satuan: "Eksemplar", price: 50000, category: "buku" }
             ],
             "A.2": [
-                { kodeArkas: "04.06.01", uraian: "Workshop / IHT Pembelajaran Numerasi Kontekstual & Pemecahan Masalah", sumberDana: "BOSP Reguler", vol: 25, satuan: "Orang/Kegiatan", price: 40000 },
-                { kodeArkas: "05.08.01", uraian: "Pengadaan Alat Peraga & Media Pembelajaran Matematika Interaktif", sumberDana: "BOSP Reguler", vol: 5, satuan: "Paket", price: 350000 }
+                { kodeArkas: "04.06.01", uraian: "Workshop / IHT Pembelajaran Numerasi Kontekstual & Pemecahan Masalah", sumberDana: "BOSP Reguler", vol: 25, satuan: "Orang/Kegiatan", price: 40000, category: "operasional" },
+                { kodeArkas: "05.08.01", uraian: "Pengadaan Alat Peraga & Media Pembelajaran Matematika Interaktif", sumberDana: "BOSP Reguler", vol: 5, satuan: "Paket", price: 350000, category: "operasional" }
             ],
             "A.3": [
-                { kodeArkas: "03.03.04", uraian: "Kegiatan Kokurikuler & Gelar Karya Penguatan Karakter Murid", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 2500000 }
+                { kodeArkas: "03.03.04", uraian: "Kegiatan Kokurikuler & Gelar Karya Penguatan Karakter Murid", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 2500000, category: "operasional" }
             ],
             "C.3": [
-                { kodeArkas: "04.06.05", uraian: "Transport & Dukungan Pelatihan Peningkatan Kompetensi Pedagogik GTK", sumberDana: "BOSP Reguler", vol: 15, satuan: "Orang/Kegiatan", price: 100000 }
+                { kodeArkas: "04.06.05", uraian: "Transport & Dukungan Pelatihan Peningkatan Kompetensi Pedagogik GTK", sumberDana: "BOSP Reguler", vol: 15, satuan: "Orang/Kegiatan", price: 100000, category: "operasional" }
             ],
             "C.4": [
-                { kodeArkas: "04.06.02", uraian: "Honorarium Narasumber IHT Peningkatan Kompetensi Guru", sumberDana: "BOSP Reguler", vol: 2, satuan: "Orang/Jam", price: 500000 }
+                { kodeArkas: "04.06.02", uraian: "Honorarium Narasumber IHT Peningkatan Kompetensi Guru", sumberDana: "BOSP Reguler", vol: 4, satuan: "Orang/Jam", price: 500000, category: "honor" }
             ],
             "D.1": [
-                { kodeArkas: "04.06.01", uraian: "IHT Penyusunan Modul Ajar Berdiferensiasi & Pembelajaran Interaktif", sumberDana: "BOSP Reguler", vol: 30, satuan: "Orang/Kegiatan", price: 35000 },
-                { kodeArkas: "05.05.02", uraian: "Penggandaan Bahan Ajar & Lembar Kerja Murid (LKPD) Kontekstual", sumberDana: "BOSP Reguler", vol: 500, satuan: "Lembar", price: 500 }
+                { kodeArkas: "04.06.01", uraian: "IHT Penyusunan Modul Ajar Berdiferensiasi & Pembelajaran Interaktif", sumberDana: "BOSP Reguler", vol: 30, satuan: "Orang/Kegiatan", price: 35000, category: "operasional" },
+                { kodeArkas: "05.05.02", uraian: "Penggandaan Bahan Ajar & Lembar Kerja Murid (LKPD) Kontekstual", sumberDana: "BOSP Reguler", vol: 500, satuan: "Lembar", price: 500, category: "operasional" }
             ],
             "D.2": [
-                { kodeArkas: "04.06.03", uraian: "Kegiatan Refleksi Pembelajaran & Peer Coaching Antar Guru (Kombel)", sumberDana: "BOSP Reguler", vol: 4, satuan: "Kegiatan", price: 450000 }
+                { kodeArkas: "04.06.03", uraian: "Kegiatan Refleksi Pembelajaran & Peer Coaching Antar Guru (Kombel)", sumberDana: "BOSP Reguler", vol: 4, satuan: "Kegiatan", price: 450000, category: "operasional" }
             ],
             "D.3": [
-                { kodeArkas: "06.05.01", uraian: "Rapat Kerja Penyusunan Kurikulum Satuan Pendidikan (KSP) & Supervisi", sumberDana: "BOSP Reguler", vol: 25, satuan: "Orang/Kegiatan", price: 35000 }
+                { kodeArkas: "06.05.01", uraian: "Rapat Kerja Penyusunan Kurikulum Satuan Pendidikan (KSP) & Supervisi", sumberDana: "BOSP Reguler", vol: 25, satuan: "Orang/Kegiatan", price: 35000, category: "operasional" }
             ],
             "D.4": [
-                { kodeArkas: "03.03.11", uraian: "Sosialisasi Pencegahan Perundungan, Kekerasan Seksual & Penguatan TPPK", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1800000 }
+                { kodeArkas: "03.03.11", uraian: "Sosialisasi Pencegahan Perundungan, Kekerasan Seksual & Penguatan TPPK", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1800000, category: "operasional" }
             ],
             "D.8": [
-                { kodeArkas: "03.03.06", uraian: "Kegiatan Pembinaan Toleransi & Kebinekaan Peserta Didik", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1500000 }
+                { kodeArkas: "03.03.06", uraian: "Kegiatan Pembinaan Toleransi & Kebinekaan Peserta Didik", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1500000, category: "operasional" }
             ],
             "D.10": [
-                { kodeArkas: "04.06.04", uraian: "Pelatihan Guru Layanan Pendidikan Inklusif & Akomodasi Layak", sumberDana: "BOSP Reguler", vol: 10, satuan: "Orang/Kegiatan", price: 75000 }
+                { kodeArkas: "04.06.04", uraian: "Pelatihan Guru Layanan Pendidikan Inklusif & Akomodasi Layak", sumberDana: "BOSP Reguler", vol: 10, satuan: "Orang/Kegiatan", price: 75000, category: "operasional" }
             ],
             "D.18": [
-                { kodeArkas: "05.08.12", uraian: "Pengadaan Rambu Jalur Evakuasi, Titik Kumpul & Perlengkapan P3K SPAB", sumberDana: "BOSP Reguler", vol: 1, satuan: "Paket", price: 2250000 },
-                { kodeArkas: "03.03.15", uraian: "Simulasi Tanggap Darurat Bencana Warga Satuan Pendidikan (SPAB)", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1250000 }
+                { kodeArkas: "05.08.12", uraian: "Pemeliharaan Ringan & Pengadaan Rambu Jalur Evakuasi / P3K SPAB", sumberDana: "BOSP Reguler", vol: 1, satuan: "Paket", price: 2250000, category: "sarpras" },
+                { kodeArkas: "03.03.15", uraian: "Simulasi Tanggap Darurat Bencana Warga Satuan Pendidikan (SPAB)", sumberDana: "BOSP Reguler", vol: 1, satuan: "Kegiatan", price: 1250000, category: "operasional" }
             ],
             "E.1": [
-                { kodeArkas: "06.05.08", uraian: "Rapat Koordinasi Komite Sekolah & Orang Tua Murid (Parenting PBD)", sumberDana: "BOSP Reguler", vol: 40, satuan: "Orang/Kegiatan", price: 25000 }
+                { kodeArkas: "06.05.08", uraian: "Rapat Koordinasi Komite Sekolah & Orang Tua Murid (Parenting PBD)", sumberDana: "BOSP Reguler", vol: 40, satuan: "Orang/Kegiatan", price: 25000, category: "operasional" }
             ],
             "E.5": [
-                { kodeArkas: "06.05.04", uraian: "Penyusunan & Pencetakan Poster Tata Tertib / Kebijakan Anti Kekerasan", sumberDana: "BOSP Reguler", vol: 10, satuan: "Buah", price: 85000 }
+                { kodeArkas: "06.05.04", uraian: "Penyusunan & Pencetakan Poster Tata Tertib / Kebijakan Anti Kekerasan", sumberDana: "BOSP Reguler", vol: 10, satuan: "Buah", price: 85000, category: "operasional" }
             ],
             "E.6": [
-                { kodeArkas: "05.02.01", uraian: "Pengadaan Buku Teks Utama Pendamping Kurikulum (SIPLah)", sumberDana: "BOSP Reguler", vol: 80, satuan: "Eksemplar", price: 55000 }
+                { kodeArkas: "05.02.01", uraian: "Pengadaan Buku Teks Utama & Buku Pengayaan Perpustakaan (SIPLah)", sumberDana: "BOSP Reguler", vol: 180, satuan: "Eksemplar", price: 55000, category: "buku" }
             ]
         };
 
@@ -1109,10 +1155,18 @@
             return `${code} ${rawName}`;
         }
 
+        function detectSchoolStatusFromName(name) {
+            const upper = String(name || "").toUpperCase();
+            if (/\b(SDN|SMPN|SMAN|SMKN|TKN|NEGERI)\b/.test(upper)) return "Negeri";
+            if (/\b(SDS|SMPS|SMAS|SMKS|TKS|SWASTA|YAYASAN|IT|MUHAMMADIYAH|MA'ARIF|AL-|SANTA|SANTO|KRISTEN|KATOLIK)\b/.test(upper)) return "Swasta";
+            return null;
+        }
+
         let schoolData = {
             schoolName: "SMPN 3 Tarogong Kidul",
             npsn: "20209354",
             jenjang: "SMP",
+            schoolStatus: "Negeri",
             statusRapor: "Aktif",
             evalYear: "2026",
             targetTP: "2026/2027",
@@ -1160,6 +1214,9 @@
                         if (String(schoolData.schoolName).startsWith("http")) {
                             schoolData.schoolName = "SMPN 3 Tarogong Kidul";
                         }
+                        if (!schoolData.schoolStatus) {
+                            schoolData.schoolStatus = detectSchoolStatusFromName(schoolData.schoolName) || "Negeri";
+                        }
                         schoolData.indicators = (schoolData.indicators || []).filter(ind =>
                             isIndicatorAllowedForJenjang(ind.code, ind.name, schoolData.jenjang || "SMP")
                         );
@@ -1172,7 +1229,7 @@
             const t = document.getElementById('syncToast');
             document.getElementById('syncToastText').textContent = msg;
             t.style.display = 'block';
-            setTimeout(() => t.style.display = 'none', 3800);
+            setTimeout(() => t.style.display = 'none', 4000);
         }
 
         function cleanNonJenjangIndicators() {
@@ -1229,7 +1286,7 @@
                 `Assalamu'alaikum Wr. Wb. Yth. Bapak/Ibu *${schoolData.supervisorName || 'Pengawas Sekolah'}*,`,
                 ``,
                 `Berikut kami kirimkan Paket Data EDS-PBD 8 SNP dari:`,
-                `• *Sekolah:* ${schoolData.schoolName}`,
+                `• *Sekolah:* ${schoolData.schoolName} (${schoolData.schoolStatus || 'Negeri'})`,
                 `• *NPSN:* ${schoolData.npsn}`,
                 `• *Kepala Sekolah:* ${schoolData.kepsekName || '-'}`,
                 `• *Capaian Literasi / Numerasi:* ${litStr} / ${numStr}`,
@@ -1374,6 +1431,9 @@
                             throw new Error("Format file JSON tidak dikenali.");
                         }
                     }
+                    if (!schoolData.schoolStatus) {
+                        schoolData.schoolStatus = detectSchoolStatusFromName(schoolData.schoolName) || "Negeri";
+                    }
                     schoolData.indicators = (schoolData.indicators || []).filter(ind =>
                         isIndicatorAllowedForJenjang(ind.code, ind.name, schoolData.jenjang || "SMP")
                     );
@@ -1410,7 +1470,11 @@
         }
 
         function updateIdentity() {
-            schoolData.schoolName = document.getElementById('schoolName').value.trim() || schoolData.schoolName;
+            const newName = document.getElementById('schoolName').value.trim() || schoolData.schoolName;
+            schoolData.schoolName = newName;
+            const autoStatus = detectSchoolStatusFromName(newName);
+            if (autoStatus) schoolData.schoolStatus = autoStatus;
+
             schoolData.npsn = document.getElementById('schoolNPSN').value.trim() || schoolData.npsn;
             schoolData.evalYear = document.getElementById('evalYear').value;
             schoolData.targetTP = document.getElementById('targetTP').value.trim();
@@ -1431,6 +1495,14 @@
             persist();
             syncAllUI();
             showToast(`Jenjang diubah ke ${val}. Indikator disesuaikan otomatis.`);
+        }
+
+        function updateSchoolStatus(val) {
+            schoolData.schoolStatus = val || "Negeri";
+            persist();
+            renderArkasTable();
+            const maxHonorPct = schoolData.schoolStatus === "Swasta" ? "40%" : "20%";
+            showToast(`Status diubah ke Sekolah ${schoolData.schoolStatus} (Kuota Honorarium Maks. ${maxHonorPct}).`);
         }
 
         function updateBospPagu(val) {
@@ -1467,6 +1539,8 @@
             document.getElementById('supervisorPhone').value = schoolData.supervisorPhone || '';
             document.getElementById('jenjangSelect').value = schoolData.jenjang || 'SMP';
             document.getElementById('paguBospInput').value = schoolData.paguBosp || 150000000;
+            const statusEl = document.getElementById('schoolStatusSelect');
+            if (statusEl) statusEl.value = schoolData.schoolStatus || 'Negeri';
 
             const activeBtn = document.querySelector('.tab-btn.active');
             const activeId = activeBtn ? activeBtn.id.replace('btn-', '') : 'tab-ringkasan';
@@ -1542,7 +1616,7 @@
                 grid.appendChild(card);
             });
 
-            // Priority List (Sebelah Kanan — Kalimat Lengkap & Badge Rapi Tidak Terpotong)
+            // Priority List
             const prioContainer = document.getElementById('priorityListDashboard');
             prioContainer.innerHTML = '';
             const prioList = inds.filter(i => i.capaian !== 'Baik').slice(0, 5);
@@ -1801,7 +1875,7 @@
                     generatedRkt.push({
                         bidang: "6. Standar Sarana & Prasarana",
                         program: "Satuan Pendidikan Aman Bencana / SPAB (D.18)",
-                        kegiatan: "Simulasi Tanggap Bencana & Kelengkapan Rambu Evakuasi serta P3K SPAB",
+                        kegiatan: "Simulasi Tanggap Bencana & Pemeliharaan Ringan Rambu Evakuasi / P3K SPAB",
                         pj: "Wakasek Sarpras & Tim SPAB",
                         waktu: "Agustus - September 2026",
                         target: "Tersedia SOP & Jalur Evakuasi Standar SPAB (D.18)"
@@ -1813,7 +1887,7 @@
                         kegiatan: "Pengadaan Buku Teks Utama dan Buku Bacaan Bermutu via SIPLah",
                         pj: "Kepala Perpustakaan",
                         waktu: "Juli - Agustus 2026",
-                        target: "Rasio Ketersediaan Buku Murid (E.6) Tercukupi 100%"
+                        target: "Rasio Ketersediaan Buku Murid (E.6) Tercukupi Minimal 10% BOSP"
                     });
                 } else {
                     const shortTitle = getShortIndicatorCaption(ind).replace(/^[A-E]\.\d+\s+/, '');
@@ -1842,20 +1916,42 @@
         }
 
         /* ----------------------------------------------------
-           AI GENERATIF TAHAP 4: SINKRONISASI RAPOR & RKT KE ARKAS
+           AI GENERATIF TAHAP 4: SINKRONISASI RAPOR, RKT & KUOTA BOSP PERMENDIKDASMEN 8/2026
         ---------------------------------------------------- */
-        function autoGenerateArkasFromRaporAndRkt(silent = false) {
-            const generatedArkas = [];
-            const usedCodes = new Set();
+        function classifyArkasItemCategory(item) {
+            const kode = String(item.kodeArkas || "").trim();
+            const text = `${item.kegiatanRkt || ""} ${item.uraian || ""}`.toLowerCase();
 
-            // 1. Sinkronisasi langsung berdasarkan indikator prioritas Rapor Pendidikan (Kurang / Sedang)
+            // 1. Kategori Buku / Perpustakaan (Kode 05.02.xx atau kata kunci buku/perpustakaan)
+            if (kode.startsWith("05.02") || /\b(buku|perpustakaan|pojok baca|referensi|teks utama|fiksi|nonfiksi)\b/.test(text)) {
+                return "buku";
+            }
+            // 2. Kategori Pembayaran Honorarium (Kode 07.12.xx / 04.06.02 atau kata kunci honor/gaji)
+            if (kode.startsWith("07.12") || kode === "04.06.02" || /\b(honor|honorarium|gaji guru|insentif|narasumber)\b/.test(text)) {
+                return "honor";
+            }
+            // 3. Kategori Pemeliharaan Sarpras Ringan-Sedang (Kode 05.08.xx atau kata kunci pemeliharaan/rehab/perbaikan)
+            if (kode.startsWith("05.08") || /\b(pemeliharaan|perbaikan|rehab|pengecatan|atap|plafon|sanitasi|toilet|rambu|sarpras)\b/.test(text)) {
+                return "sarpras";
+            }
+            return "operasional";
+        }
+
+        function autoGenerateArkasFromRaporAndRkt(silent = false) {
+            const pagu = parseFloat(schoolData.paguBosp) || 150000000;
+            const statusSekolah = schoolData.schoolStatus || detectSchoolStatusFromName(schoolData.schoolName) || "Negeri";
+            const minBukuAmount = Math.ceil(pagu * 0.10); // Minimal 10%
+            const maxHonorAmount = Math.floor(pagu * (statusSekolah === "Swasta" ? 0.40 : 0.20)); // Maks 20% Negeri, 40% Swasta
+            const maxSarprasAmount = Math.floor(pagu * 0.20); // Maks 20%
+
+            const generatedArkas = [];
             const prioInds = (schoolData.indicators || []).filter(i => i.capaian !== 'Baik');
 
+            // 1. Sinkronisasi item dari indikator prioritas Rapor Pendidikan & RKT
             prioInds.forEach(ind => {
                 const code = String(ind.code || "").trim().toUpperCase();
                 const shortTitle = getShortIndicatorCaption(ind).replace(/^[A-E]\.\d+\s+/, '');
                 
-                // Cari kegiatan RKT yang relevan sebagai rujukan kolom Kegiatan Benahi (RKT)
                 const matchedRkt = (schoolData.rkt || []).find(r =>
                     r.program.toUpperCase().includes(code) ||
                     r.program.toLowerCase().includes(shortTitle.toLowerCase()) ||
@@ -1879,7 +1975,6 @@
                             total: tpl.vol * tpl.price
                         });
                     });
-                    usedCodes.add(code);
                 } else {
                     generatedArkas.push({
                         kegiatanRkt: kegiatanLabel,
@@ -1891,11 +1986,10 @@
                         price: 35000,
                         total: 875000
                     });
-                    usedCodes.add(code);
                 }
             });
 
-            // 2. Jika ada baris RKT tambahan yang belum terwakili oleh kode indikator di atas, buatkan item ARKAS-nya
+            // 2. Tambahkan RKT tambahan yang belum terwakili
             (schoolData.rkt || []).forEach(r => {
                 const alreadyCovered = generatedArkas.some(a => a.kegiatanRkt === r.kegiatan);
                 if (!alreadyCovered) {
@@ -1909,12 +2003,12 @@
                     if (lowerText.includes("buku") || lowerText.includes("perpustakaan") || lowerText.includes("siplah")) {
                         kodeArkas = "05.02.01";
                         uraian = `Pengadaan Buku Teks Utama & Bacaan Bermutu (${r.program})`;
-                        vol = 60;
+                        vol = 100;
                         satuan = "Eksemplar";
-                        price = 50000;
-                    } else if (lowerText.includes("bencana") || lowerText.includes("spab") || lowerText.includes("evakuasi")) {
+                        price = 55000;
+                    } else if (lowerText.includes("bencana") || lowerText.includes("spab") || lowerText.includes("evakuasi") || lowerText.includes("sarpras")) {
                         kodeArkas = "05.08.12";
-                        uraian = `Pengadaan Rambu Evakuasi & Perlengkapan Mitigasi Bencana (${r.program})`;
+                        uraian = `Pemeliharaan Ringan & Pengadaan Rambu Evakuasi / Sarpras (${r.program})`;
                         vol = 1;
                         satuan = "Paket";
                         price = 2000000;
@@ -1939,25 +2033,85 @@
                 }
             });
 
-            // Fallback jika seluruh indikator sudah Baik dan RKT kosong
-            if (generatedArkas.length === 0) {
+            // 3. Keseimbangan Otomatis Permendikdasmen No. 8 Tahun 2026:
+            // Pastikan alokasi Buku minimal 10% dari Total Pagu BOSP Reguler
+            let currentBukuTotal = generatedArkas
+                .filter(item => classifyArkasItemCategory(item) === "buku")
+                .reduce((s, item) => s + (item.vol * item.price), 0);
+
+            if (currentBukuTotal < minBukuAmount) {
+                const kekuranganBuku = minBukuAmount - currentBukuTotal;
+                const existingBukuIdx = generatedArkas.findIndex(item => classifyArkasItemCategory(item) === "buku");
+
+                if (existingBukuIdx >= 0) {
+                    const itemBuku = generatedArkas[existingBukuIdx];
+                    const tambahVol = Math.ceil(kekuranganBuku / (itemBuku.price || 55000));
+                    itemBuku.vol += tambahVol;
+                    itemBuku.total = itemBuku.vol * itemBuku.price;
+                } else {
+                    const hargaBuku = 55000;
+                    const volBuku = Math.ceil(minBukuAmount / hargaBuku);
+                    generatedArkas.unshift({
+                        kegiatanRkt: "Pengembangan Perpustakaan & Pojok Baca Literasi (Wajib Min. 10% BOSP)",
+                        kodeArkas: "05.02.01",
+                        uraian: "Pengadaan Buku Teks Utama & Buku Bacaan Bermutu Perpustakaan (SIPLah)",
+                        sumberDana: "BOSP Reguler",
+                        vol: volBuku,
+                        satuan: "Eksemplar",
+                        price: hargaBuku,
+                        total: volBuku * hargaBuku
+                    });
+                }
+            }
+
+            // 4. Penyesuaian Alokasi Honorarium (Sesuai Status Negeri Maks. 20% / Swasta Maks. 40%)
+            // Tambahkan pos dukungan honorarium tenaga teknis/pendidik non-ASN PBD yang proporsional jika belum ada
+            const hasHonorRow = generatedArkas.some(item => classifyArkasItemCategory(item) === "honor");
+            if (!hasHonorRow) {
+                const targetHonorPct = statusSekolah === "Swasta" ? 0.15 : 0.08; // Alokasi PBD aman di bawah batas 40% / 20%
+                const targetHonorRp = Math.floor(pagu * targetHonorPct);
+                const bulan = 12;
+                const honorPerBulan = Math.max(250000, Math.round((targetHonorRp / bulan) / 50000) * 50000);
                 generatedArkas.push({
-                    kegiatanRkt: "Optimalisasi Komunitas Belajar (Kombel) Guru",
-                    kodeArkas: "04.06.01",
-                    uraian: "Konsumsi & ATK Kegiatan Komunitas Belajar Guru",
+                    kegiatanRkt: `Dukungan Layanan Pembelajaran & Perpustakaan PBD (${statusSekolah})`,
+                    kodeArkas: "07.12.01",
+                    uraian: `Pembayaran Honorarium Guru / Tenaga Perpustakaan Non-ASN (${statusSekolah})`,
                     sumberDana: "BOSP Reguler",
-                    vol: 30,
-                    satuan: "Orang/Kegiatan",
-                    price: 35000,
-                    total: 1050000
+                    vol: bulan,
+                    satuan: "Orang/Bulan",
+                    price: honorPerBulan,
+                    total: bulan * honorPerBulan
                 });
             }
 
-            schoolData.arkas = generatedArkas;
+            // Pastikan Honorarium & Sarpras tidak melebihi batas maksimal Permendikdasmen 8/2026
+            let sumHonor = 0;
+            let sumSarpras = 0;
+            generatedArkas.forEach(item => {
+                const cat = classifyArkasItemCategory(item);
+                if (cat === "honor") {
+                    if (sumHonor + (item.vol * item.price) > maxHonorAmount) {
+                        const sisaKuota = Math.max(0, maxHonorAmount - sumHonor);
+                        item.vol = Math.floor(sisaKuota / (item.price || 1));
+                        item.total = item.vol * item.price;
+                    }
+                    sumHonor += item.vol * item.price;
+                } else if (cat === "sarpras") {
+                    if (sumSarpras + (item.vol * item.price) > maxSarprasAmount) {
+                        const sisaKuota = Math.max(0, maxSarprasAmount - sumSarpras);
+                        item.vol = Math.floor(sisaKuota / (item.price || 1));
+                        item.total = item.vol * item.price;
+                    }
+                    sumSarpras += item.vol * item.price;
+                }
+            });
+
+            schoolData.arkas = generatedArkas.filter(item => item.vol > 0);
             persist();
             renderArkasTable();
             if (!silent) {
-                showToast(`AI Berhasil Menyusun ${generatedArkas.length} Rincian Anggaran ARKAS Tersinkron Rapor & RKT!`);
+                const maxHonorLabel = statusSekolah === "Swasta" ? "40%" : "20%";
+                showToast(`RKAS PBD Tersusun! Buku ≥ 10%, Honor ${statusSekolah} ≤ ${maxHonorLabel}, Sarpras ≤ 20%.`);
             }
         }
 
@@ -1965,11 +2119,19 @@
             const tbody = document.getElementById('arkasTableBody');
             tbody.innerHTML = '';
             let grandTotal = 0;
+            let totalBuku = 0;
+            let totalHonor = 0;
+            let totalSarpras = 0;
 
             (schoolData.arkas || []).forEach((a, idx) => {
                 const tot = (parseFloat(a.vol) || 0) * (parseFloat(a.price) || 0);
                 a.total = tot;
                 grandTotal += tot;
+
+                const cat = classifyArkasItemCategory(a);
+                if (cat === "buku") totalBuku += tot;
+                else if (cat === "honor") totalHonor += tot;
+                else if (cat === "sarpras") totalSarpras += tot;
 
                 const tr = document.createElement('tr');
                 tr.innerHTML = `
@@ -2000,6 +2162,52 @@
             const sisaEl = document.getElementById('sisaPaguBosp');
             sisaEl.textContent = `Rp ${sisa.toLocaleString('id-ID')}`;
             sisaEl.style.color = sisa < 0 ? '#dc2626' : '#059669';
+
+            // Update 3 Panel Indikator Kuota Permendikdasmen No. 8 Tahun 2026
+            const statusSekolah = schoolData.schoolStatus || "Negeri";
+            const maxHonorRatio = statusSekolah === "Swasta" ? 0.40 : 0.20;
+            const maxHonorPctLabel = statusSekolah === "Swasta" ? "40%" : "20%";
+
+            const pctBuku = pagu > 0 ? ((totalBuku / pagu) * 100) : 0;
+            const pctHonor = pagu > 0 ? ((totalHonor / pagu) * 100) : 0;
+            const pctSarpras = pagu > 0 ? ((totalSarpras / pagu) * 100) : 0;
+
+            // 1. Buku Minimal 10%
+            const bukuBox = document.getElementById('quotaBukuBox');
+            const minBukuRp = Math.ceil(pagu * 0.10);
+            const isBukuOk = totalBuku >= minBukuRp && pagu > 0;
+            bukuBox.className = `quota-pill ${isBukuOk ? 'ok' : 'warn'}`;
+            document.getElementById('quotaBukuVal').textContent = `Rp ${totalBuku.toLocaleString('id-ID')} (${pctBuku.toFixed(1)}%)`;
+            const bukuNote = document.getElementById('quotaBukuNote');
+            bukuNote.style.color = isBukuOk ? '#065f46' : '#991b1b';
+            bukuNote.textContent = isBukuOk
+                ? `✓ Terpenuhi (Minimal Rp ${minBukuRp.toLocaleString('id-ID')})`
+                : `⚠ Kurang Rp ${(minBukuRp - totalBuku).toLocaleString('id-ID')} dari batas min. 10%`;
+
+            // 2. Honorarium Maksimal 20% (Negeri) / 40% (Swasta)
+            const honorBox = document.getElementById('quotaHonorBox');
+            const maxHonorRp = Math.floor(pagu * maxHonorRatio);
+            const isHonorOk = totalHonor <= maxHonorRp;
+            honorBox.className = `quota-pill ${isHonorOk ? 'ok' : 'warn'}`;
+            document.getElementById('quotaHonorTarget').textContent = `Maks. ${maxHonorPctLabel} (${statusSekolah})`;
+            document.getElementById('quotaHonorVal').textContent = `Rp ${totalHonor.toLocaleString('id-ID')} (${pctHonor.toFixed(1)}%)`;
+            const honorNote = document.getElementById('quotaHonorNote');
+            honorNote.style.color = isHonorOk ? '#065f46' : '#991b1b';
+            honorNote.textContent = isHonorOk
+                ? `✓ Aman (Batas maks. Rp ${maxHonorRp.toLocaleString('id-ID')})`
+                : `⚠ Melebihi batas maks. ${maxHonorPctLabel} sebesar Rp ${(totalHonor - maxHonorRp).toLocaleString('id-ID')}`;
+
+            // 3. Sarpras Ringan-Sedang Maksimal 20%
+            const sarprasBox = document.getElementById('quotaSarprasBox');
+            const maxSarprasRp = Math.floor(pagu * 0.20);
+            const isSarprasOk = totalSarpras <= maxSarprasRp;
+            sarprasBox.className = `quota-pill ${isSarprasOk ? 'ok' : 'warn'}`;
+            document.getElementById('quotaSarprasVal').textContent = `Rp ${totalSarpras.toLocaleString('id-ID')} (${pctSarpras.toFixed(1)}%)`;
+            const sarprasNote = document.getElementById('quotaSarprasNote');
+            sarprasNote.style.color = isSarprasOk ? '#065f46' : '#991b1b';
+            sarprasNote.textContent = isSarprasOk
+                ? `✓ Aman (Batas maks. Rp ${maxSarprasRp.toLocaleString('id-ID')})`
+                : `⚠ Melebihi batas maks. 20% sebesar Rp ${(totalSarpras - maxSarprasRp).toLocaleString('id-ID')}`;
         }
 
         function addArkasRow() {
@@ -2125,6 +2333,7 @@
             `).join('');
 
             document.getElementById('rkasDocSchool').textContent = schoolData.schoolName;
+            document.getElementById('rkasDocStatus').textContent = schoolData.schoolStatus || 'Negeri';
             document.getElementById('rkasDocYear').textContent = schoolData.evalYear;
             let sumArkas = 0;
             document.getElementById('docRkasTableBody').innerHTML = (schoolData.arkas || []).map((a, i) => {
@@ -2233,6 +2442,8 @@
                                 const nextVal = String(row[c+1]).trim();
                                 if ((lbl === "nama sekolah" || lbl === "nama satuan pendidikan") && nextVal.length > 3 && !nextVal.startsWith("http")) {
                                     schoolData.schoolName = nextVal;
+                                    const detectedSt = detectSchoolStatusFromName(nextVal);
+                                    if (detectedSt) schoolData.schoolStatus = detectedSt;
                                 }
                             }
 
@@ -2279,7 +2490,7 @@
                         schoolData.indicators = Array.from(extractedMap.values());
                     }
 
-                    // Otomatis isi berantai dari Tahap 2 (Refleksi), Tahap 3 (RKT), Tahap 4 (ARKAS), hingga Tahap 5 (Monev)
+                    // Otomatis isi berantai dari Tahap 2 (Refleksi), Tahap 3 (RKT), Tahap 4 (ARKAS sesuai kuota BOSP), hingga Tahap 5 (Monev)
                     autoGenerateAIReflections();
                     autoSuggestRkt();
                     autoGenerateArkasFromRaporAndRkt(true);
@@ -2289,7 +2500,7 @@
                     document.getElementById('aiProcessingState').style.display = 'none';
                     closeAiUploadModal();
                     syncAllUI();
-                    showToast(`Berhasil membaca ${schoolData.indicators.length} indikator & menyusun Refleksi, RKT, serta ARKAS!`);
+                    showToast(`Berhasil membaca ${schoolData.indicators.length} indikator & menyusun Refleksi, RKT, serta RKAS (${schoolData.schoolStatus})!`);
                 } catch (err) {
                     alert("Gagal memproses file Excel: " + err.message);
                     document.getElementById('aiProcessingState').style.display = 'none';
