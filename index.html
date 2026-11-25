@@ -764,27 +764,52 @@
                     </div>
                 </div>
 
-                <div class="table-responsive">
-                    <table>
+                <!-- Filter & Rekapitulasi Mini 12 Komponen BOSP -->
+                <div style="margin-bottom: 14px; background: #f8fafc; border: 1px solid #e2e8f0; border-radius: 10px; padding: 12px;">
+                    <div style="display: flex; justify-content: space-between; align-items: center; margin-bottom: 8px; flex-wrap: wrap; gap: 6px;">
+                        <span style="font-size: 12px; font-weight: 800; color: #065f46; text-transform: uppercase;">
+                            📊 Filter & Distribusi 12 Komponen BOSP (Permendikdasmen No. 8 Tahun 2026)
+                        </span>
+                        <div style="display: flex; gap: 6px; flex-wrap: wrap;">
+                            <button type="button" onclick="clearKomponenFilter()" class="btn btn-sm btn-slate">Tampilkan Semua Komponen</button>
+                            <button type="button" onclick="autoGenerateFull12KomponenRKAS()" class="btn btn-sm btn-emerald">⚡ Susun Otomatis 12 Komponen BOSP</button>
+                            <button type="button" onclick="smartBalanceBudget100()" class="btn btn-sm btn-amber">⚖️ Seimbangkan Pagu 100% (Sisa Rp 0)</button>
+                        </div>
+                    </div>
+                    <div id="komponenMiniGrid" style="display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 6px;"></div>
+                </div>
+
+                <div class="table-responsive" style="overflow-x: auto;">
+                    <table style="min-width: 1480px;">
                         <thead>
                             <tr>
-                                <th>Kegiatan Benahi (RKT)</th>
-                                <th>Kode ARKAS & Rekening</th>
-                                <th>Uraian Barang / Jasa</th>
-                                <th>Vol Smt 1 (Jan–Jun)</th>
-                                <th>Vol Smt 2 (Jul–Des)</th>
+                                <th style="min-width: 200px;">Komponen BOSP (1–12) & Kegiatan RKT</th>
+                                <th style="min-width: 220px;">Kode Rekening Belanja & ARKAS</th>
+                                <th style="min-width: 220px;">Uraian Barang / Jasa</th>
                                 <th>Satuan</th>
-                                <th>Harga Satuan (Rp)</th>
-                                <th>Tahap I (Rp)</th>
-                                <th>Tahap II (Rp)</th>
-                                <th>Total 1 Tahun (Rp)</th>
+                                <th style="text-align: right;">Harga Satuan (Rp)</th>
+                                <th style="background:#eff6ff; text-align:center;">Jan</th>
+                                <th style="background:#eff6ff; text-align:center;">Feb</th>
+                                <th style="background:#eff6ff; text-align:center;">Mar</th>
+                                <th style="background:#eff6ff; text-align:center;">Apr</th>
+                                <th style="background:#eff6ff; text-align:center;">Mei</th>
+                                <th style="background:#eff6ff; text-align:center;">Jun</th>
+                                <th style="background:#f5f3ff; text-align:center;">Jul</th>
+                                <th style="background:#f5f3ff; text-align:center;">Agu</th>
+                                <th style="background:#f5f3ff; text-align:center;">Sep</th>
+                                <th style="background:#f5f3ff; text-align:center;">Okt</th>
+                                <th style="background:#f5f3ff; text-align:center;">Nov</th>
+                                <th style="background:#f5f3ff; text-align:center;">Des</th>
+                                <th style="text-align: right;">Tahap I (Rp)</th>
+                                <th style="text-align: right;">Tahap II (Rp)</th>
+                                <th style="text-align: right;">Total 1 Tahun (Rp)</th>
                                 <th style="text-align: center;">Aksi</th>
                             </tr>
                         </thead>
                         <tbody id="arkasTableBody"></tbody>
                         <tfoot>
                             <tr style="background: #f8fafc; font-weight: bold;">
-                                <td colspan="7" style="text-align: right; text-transform: uppercase;">Total Rencana Anggaran Tahunan (Tahap I + Tahap II):</td>
+                                <td colspan="17" style="text-align: right; text-transform: uppercase;">Total Rencana Anggaran Tahunan (Tahap I + Tahap II):</td>
                                 <td id="arkasTahap1Sum" class="nowrap" style="color: #1d4ed8;">Rp 0</td>
                                 <td id="arkasTahap2Sum" class="nowrap" style="color: #6d28d9;">Rp 0</td>
                                 <td id="arkasTotalSum" class="nowrap" style="color: #0d9488; font-size: calc(14px * var(--ui-scale));">Rp 0</td>
@@ -2885,6 +2910,359 @@
         /* ----------------------------------------------------
            APPLICATION INITIALIZATION LOOP
         ---------------------------------------------------- */
+        /* =========================================================================
+           MODUL INTEGRASI RKAS 12 KOMPONEN BOSP & RINCIAN 12 BULAN (JAN–DES)
+        ========================================================================= */
+        const MASTER_12_KOMPONEN_BOSP = [
+            { id: 1, nama: '1. Penerimaan Murid Baru', kodeArkas: '01.03.01', defaultRek: '5.1.02.01.01.0052 - Belanja Makanan dan Minuman Rapat/Kegiatan' },
+            { id: 2, nama: '2. Pengembangan Perpustakaan & Pojok Baca (Wajib Min. 10%)', kodeArkas: '05.02.01', defaultRek: '5.2.05.01.01.0001 - Belanja Modal Buku Perpustakaan / Bahan Bacaan' },
+            { id: 3, nama: '3. Pelaksanaan Kegiatan Pembelajaran dan Ekstrakurikuler', kodeArkas: '03.03.01', defaultRek: '5.1.02.01.01.0024 - Belanja Alat/Bahan untuk Kegiatan Kantor-ATK' },
+            { id: 4, nama: '4. Pelaksanaan Kegiatan Asesmen dan Evaluasi Pembelajaran', kodeArkas: '04.06.01', defaultRek: '5.1.02.01.01.0026 - Belanja Bahan Cetak dan Penggandaan' },
+            { id: 5, nama: '5. Pelaksanaan Administrasi Kegiatan Sekolah', kodeArkas: '06.05.01', defaultRek: '5.1.02.01.01.0024 - Belanja Alat/Bahan untuk Kegiatan Kantor-ATK' },
+            { id: 6, nama: '6. Pengembangan Profesi Pendidik dan Tenaga Kependidikan', kodeArkas: '04.06.02', defaultRek: '5.1.02.01.01.0052 - Belanja Makanan dan Minuman Rapat/Kegiatan' },
+            { id: 7, nama: '7. Pembiayaan Langganan Daya dan Jasa', kodeArkas: '06.07.01', defaultRek: '5.1.02.02.01.0061 - Belanja Tagihan Listrik, Internet, & Daya/Jasa' },
+            { id: 8, nama: '8. Pemeliharaan Sarana dan Prasarana Sekolah (Maks. 20%)', kodeArkas: '05.08.01', defaultRek: '5.1.02.03.03.0001 - Belanja Pemeliharaan Gedung dan Bangunan' },
+            { id: 9, nama: '9. Penyediaan Alat Multimedia Pembelajaran', kodeArkas: '05.09.01', defaultRek: '5.2.02.10.01.0002 - Belanja Modal Peralatan Personal Computer / Multimedia' },
+            { id: 10, nama: '10. Peningkatan Kompetensi Keahlian (SMK/SLB)', kodeArkas: '03.10.01', defaultRek: '5.1.02.01.01.0012 - Belanja Bahan Praktik Kejuruan' },
+            { id: 11, nama: '11. Kegiatan Mendukung Keterserapan Lulusan (SMK/SLB)', kodeArkas: '03.11.01', defaultRek: '5.1.02.02.01.0029 - Belanja Jasa Uji Kompetensi Keahlian' },
+            { id: 12, nama: '12. Pembayaran Honorarium (Maks. 20% Negeri / 40% Swasta)', kodeArkas: '07.12.01', defaultRek: '5.1.02.02.01.0013 - Belanja Jasa Tenaga Pendidikan / Honorarium GTK' }
+        ];
+
+        let activeFilterKomponenId = null;
+
+        function inferKomponenIdFromItem(item) {
+            if (item.komponenId) return Number(item.komponenId);
+            const cat = classifyArkasItemCategory(item);
+            if (cat === 'buku') return 2;
+            if (cat === 'honor') return 12;
+            if (cat === 'sarpras') return 8;
+            const text = `${item.kegiatanRkt || ''} ${item.uraian || ''}`.toLowerCase();
+            if (/spmb|ppdb|mpls/.test(text)) return 1;
+            if (/asesmen|ujian|anbk|rapor|evaluasi/.test(text)) return 4;
+            if (/administrasi|spj|tata usaha|perjalanan dinas/.test(text)) return 5;
+            if (/pelatihan|workshop|iht|kombel|gtk/.test(text)) return 6;
+            if (/listrik|internet|air|daya|jasa/.test(text)) return 7;
+            if (/multimedia|komputer|proyektor|laptop/.test(text)) return 9;
+            return 3;
+        }
+
+        function normalizeArkasItem12Months(item) {
+            item.komponenId = inferKomponenIdFromItem(item);
+            const kompObj = MASTER_12_KOMPONEN_BOSP.find(k => k.id === item.komponenId) || MASTER_12_KOMPONEN_BOSP[2];
+            if (!item.rekening) item.rekening = kompObj.defaultRek;
+            if (!item.kodeArkas) item.kodeArkas = kompObj.kodeArkas;
+
+            const price = parseFloat(item.price) || 0;
+            if (!Array.isArray(item.monthAmounts) || item.monthAmounts.length !== 12) {
+                const t1 = (parseFloat(item.vol1) || Math.ceil((parseFloat(item.vol) || 0) / 2)) * price;
+                const t2 = (parseFloat(item.vol2) || Math.max(0, (parseFloat(item.vol) || 0) - Math.ceil((parseFloat(item.vol) || 0) / 2))) * price;
+                item.monthAmounts = [0, 0, t1, 0, 0, 0, 0, 0, t2, 0, 0, 0];
+            }
+
+            item.tahap1 = item.monthAmounts.slice(0, 6).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+            item.tahap2 = item.monthAmounts.slice(6, 12).reduce((a, b) => a + (parseFloat(b) || 0), 0);
+            item.total = item.tahap1 + item.tahap2;
+            item.vol = price > 0 ? Math.max(1, Math.round(item.total / price)) : 1;
+            return item;
+        }
+
+        function updateMonthNominal(idx, monthIdx, rawVal) {
+            if (!schoolState.arkas || !schoolState.arkas[idx]) return;
+            normalizeArkasItem12Months(schoolState.arkas[idx]);
+            const cleanNum = Math.max(0, parseFloat(String(rawVal).replace(/[^\d.-]/g, '')) || 0);
+            schoolState.arkas[idx].monthAmounts[monthIdx] = cleanNum;
+            normalizeArkasItem12Months(schoolState.arkas[idx]);
+            persist();
+            renderArkasTable();
+        }
+
+        function changeArkasItemKomponen(idx, newKompId) {
+            if (!schoolState.arkas || !schoolState.arkas[idx]) return;
+            const idNum = Number(newKompId) || 3;
+            const kompObj = MASTER_12_KOMPONEN_BOSP.find(k => k.id === idNum) || MASTER_12_KOMPONEN_BOSP[2];
+            schoolState.arkas[idx].komponenId = idNum;
+            schoolState.arkas[idx].kodeArkas = kompObj.kodeArkas;
+            schoolState.arkas[idx].rekening = kompObj.defaultRek;
+            persist();
+            renderArkasTable();
+        }
+
+        function toggleKomponenFilter(kompId) {
+            activeFilterKomponenId = (activeFilterKomponenId === kompId) ? null : kompId;
+            renderArkasTable();
+        }
+
+        function clearKomponenFilter() {
+            activeFilterKomponenId = null;
+            renderArkasTable();
+        }
+
+        function renderKomponenMiniGrid() {
+            const grid = document.getElementById('komponenMiniGrid');
+            if (!grid) return;
+            grid.innerHTML = '';
+
+            MASTER_12_KOMPONEN_BOSP.forEach(k => {
+                const sumKomp = (schoolState.arkas || [])
+                    .filter(it => inferKomponenIdFromItem(it) === k.id)
+                    .reduce((s, it) => s + (normalizeArkasItem12Months(it).total || 0), 0);
+                const isSelected = activeFilterKomponenId === k.id;
+                const card = document.createElement('div');
+                card.onclick = () => toggleKomponenFilter(k.id);
+                card.style.cssText = `cursor:pointer; padding:8px 10px; border-radius:8px; border:1px solid ${isSelected ? '#059669' : '#cbd5e1'}; background:${isSelected ? '#ecfdf5' : '#ffffff'}; font-size:11px;`;
+                card.innerHTML = `
+                    <div style="font-weight:700; color:${isSelected ? '#065f46' : '#334155'}; white-space:nowrap; overflow:hidden; text-overflow:ellipsis;" title="${esc(k.nama)}">${esc(k.nama)}</div>
+                    <div style="font-weight:800; color:#0f172a; margin-top:2px;">Rp ${sumKomp.toLocaleString('id-ID')}</div>
+                `;
+                grid.appendChild(card);
+            });
+        }
+
+        function autoGenerateFull12KomponenRKAS() {
+            const pagu = Math.max(0, parseFloat(schoolState.paguBosp) || 150000000);
+            const isSwasta = String(schoolState.schoolStatus || '').toLowerCase() === 'swasta';
+            const isVocational = ['SMK', 'SLB'].includes(String(schoolState.jenjang || '').toUpperCase());
+
+            const bukuHalf = Math.ceil((pagu * 0.108) / 2);
+            const honorMonthly = Math.floor((pagu * (isSwasta ? 0.26 : 0.135)) / 12 / 50000) * 50000;
+            const dayaMonthly = Math.max(400000, Math.round((pagu * 0.065) / 12 / 50000) * 50000);
+            const atkMonthly = Math.max(300000, Math.round((pagu * 0.03) / 12 / 50000) * 50000);
+            const sarprasHalf = Math.round((pagu * 0.045) / 50000) * 50000;
+            const asesmenHalf = Math.round((pagu * 0.06) / 50000) * 50000;
+            const gtkHalf = Math.round((pagu * 0.03) / 50000) * 50000;
+            const spmbHalf = Math.round((pagu * 0.02) / 50000) * 50000;
+            const multiHalf = Math.round((pagu * 0.035) / 50000) * 50000;
+            const pembelHalf = Math.round((pagu * 0.08) / 50000) * 50000;
+
+            const list = [
+                { komponenId: 1, kodeArkas: '01.03.01', rekening: MASTER_12_KOMPONEN_BOSP[0].defaultRek, kegiatanRkt: '1. Penerimaan Murid Baru (SPMB & MPLS)', uraian: 'Pelaksanaan SPMB, MPLS & Sosialisasi Anti-Perundungan (PPKSP)', satuan: 'Paket', price: spmbHalf, monthAmounts: [0,0,0,0,0,spmbHalf,spmbHalf,0,0,0,0,0] },
+                { komponenId: 2, kodeArkas: '05.02.01', rekening: MASTER_12_KOMPONEN_BOSP[1].defaultRek, kegiatanRkt: '2. Pengembangan Perpustakaan (Wajib Min. 10%)', uraian: 'Pengadaan Buku Teks Utama & Buku Bacaan Literasi/Numerasi (SIPLah)', satuan: 'Paket', price: bukuHalf, monthAmounts: [0,0,bukuHalf,0,0,0,bukuHalf,0,0,0,0,0] },
+                { komponenId: 3, kodeArkas: '03.03.01', rekening: MASTER_12_KOMPONEN_BOSP[2].defaultRek, kegiatanRkt: '3. Pembelajaran & Ekstrakurikuler', uraian: 'Bahan Praktik Pembelajaran Kontekstual, Alat Peraga & Ekstrakurikuler', satuan: 'Paket', price: pembelHalf, monthAmounts: [0,0,pembelHalf,0,0,0,0,0,pembelHalf,0,0,0] },
+                { komponenId: 4, kodeArkas: '04.06.01', rekening: MASTER_12_KOMPONEN_BOSP[3].defaultRek, kegiatanRkt: '4. Asesmen & Evaluasi Pembelajaran', uraian: 'Pelaksanaan Asesmen Formatif/Sumatif, ANBK & Penggandaan Naskah', satuan: 'Paket', price: asesmenHalf, monthAmounts: [0,0,asesmenHalf,0,0,0,0,0,asesmenHalf,0,0,0] },
+                { komponenId: 5, kodeArkas: '06.05.01', rekening: MASTER_12_KOMPONEN_BOSP[4].defaultRek, kegiatanRkt: '5. Administrasi Kegiatan Sekolah', uraian: 'ATK Tata Usaha, Penyusunan EDS-PBD & Pelaporan BOSP (12 Bulan)', satuan: 'Bulan', price: atkMonthly, monthAmounts: Array(12).fill(atkMonthly) },
+                { komponenId: 6, kodeArkas: '04.06.02', rekening: MASTER_12_KOMPONEN_BOSP[5].defaultRek, kegiatanRkt: '6. Pengembangan Profesi GTK', uraian: 'IHT / Kombel Peningkatan Kompetensi Literasi, Numerasi & Pedagogik Guru', satuan: 'Kegiatan', price: gtkHalf, monthAmounts: [0,gtkHalf,0,0,0,0,0,gtkHalf,0,0,0,0] },
+                { komponenId: 7, kodeArkas: '06.07.01', rekening: MASTER_12_KOMPONEN_BOSP[6].defaultRek, kegiatanRkt: '7. Langganan Daya & Jasa', uraian: 'Pembayaran Listrik, Internet Pendidikan, Air & Langganan Jasa (12 Bulan)', satuan: 'Bulan', price: dayaMonthly, monthAmounts: Array(12).fill(dayaMonthly) },
+                { komponenId: 8, kodeArkas: '05.08.01', rekening: MASTER_12_KOMPONEN_BOSP[7].defaultRek, kegiatanRkt: '8. Pemeliharaan Sarpras Sekolah (Maks. 20%)', uraian: 'Pemeliharaan Ringan Kelas, Sanitasi & Fasilitas SPAB', satuan: 'Paket', price: sarprasHalf, monthAmounts: [0,0,0,sarprasHalf,0,0,0,0,0,sarprasHalf,0,0] },
+                { komponenId: 9, kodeArkas: '05.09.01', rekening: MASTER_12_KOMPONEN_BOSP[8].defaultRek, kegiatanRkt: '9. Alat Multimedia Pembelajaran', uraian: 'Penyediaan Perangkat Multimedia Pembelajaran Digital / Proyektor', satuan: 'Paket', price: multiHalf, monthAmounts: [0,0,0,0,multiHalf,0,0,0,0,0,multiHalf,0] },
+                { komponenId: 12, kodeArkas: '07.12.01', rekening: MASTER_12_KOMPONEN_BOSP[11].defaultRek, kegiatanRkt: '12. Pembayaran Honorarium GTK (12 Bulan)', uraian: `Honorarium Rutin Bulanan Guru & Tendik (${isSwasta ? 'Swasta Maks. 40%' : 'Negeri Maks. 20%'})`, satuan: 'Bulan', price: honorMonthly, monthAmounts: Array(12).fill(honorMonthly) }
+            ];
+
+            if (isVocational) {
+                const kejHalf = Math.round((pagu * 0.04) / 50000) * 50000;
+                list.splice(9, 0,
+                    { komponenId: 10, kodeArkas: '03.10.01', rekening: MASTER_12_KOMPONEN_BOSP[9].defaultRek, kegiatanRkt: '10. Peningkatan Kompetensi Keahlian', uraian: 'Bahan Praktik Kejuruan / Keterampilan Peserta Didik', satuan: 'Paket', price: kejHalf, monthAmounts: [0,0,kejHalf,0,0,0,0,0,kejHalf,0,0,0] },
+                    { komponenId: 11, kodeArkas: '03.11.01', rekening: MASTER_12_KOMPONEN_BOSP[10].defaultRek, kegiatanRkt: '11. Keterserapan Lulusan & UKK', uraian: 'Uji Kompetensi Keahlian (UKK) & Bursa Kerja Khusus', satuan: 'Kegiatan', price: Math.round(kejHalf * 0.6), monthAmounts: [0,0,0,Math.round(kejHalf * 0.6),0,0,0,0,0,Math.round(kejHalf * 0.6),0,0] }
+                );
+            }
+
+            schoolState.arkas = list.map(normalizeArkasItem12Months);
+            activeFilterKomponenId = null;
+            smartBalanceBudget100(true);
+            showSyncToast('RKAS 12 Komponen BOSP & Rincian 12 Bulan Berhasil Disusun (Sisa Pagu Rp 0)!');
+        }
+
+        function smartBalanceBudget100(silent = false) {
+            const pagu = Math.max(0, parseFloat(schoolState.paguBosp) || 0);
+            if (pagu <= 0) return;
+            if (!schoolState.arkas || schoolState.arkas.length === 0) {
+                autoGenerateFull12KomponenRKAS();
+                return;
+            }
+
+            schoolState.arkas.forEach(normalizeArkasItem12Months);
+            const isSwasta = String(schoolState.schoolStatus || '').toLowerCase() === 'swasta';
+            const maxHonor = Math.floor(pagu * (isSwasta ? 0.40 : 0.20));
+            const maxSarpras = Math.floor(pagu * 0.20);
+            const minBuku = Math.ceil(pagu * 0.10);
+
+            const capComponent = (kompId, limit) => {
+                const items = schoolState.arkas.filter(i => i.komponenId === kompId);
+                const sum = items.reduce((s, i) => s + i.total, 0);
+                if (sum > limit && sum > 0) {
+                    const ratio = limit / sum;
+                    items.forEach(it => {
+                        it.monthAmounts = it.monthAmounts.map(m => Math.floor((m * ratio) / 1000) * 1000);
+                        normalizeArkasItem12Months(it);
+                    });
+                }
+            };
+            capComponent(12, maxHonor);
+            capComponent(8, maxSarpras);
+
+            let bukuItems = schoolState.arkas.filter(i => i.komponenId === 2);
+            let sumBuku = bukuItems.reduce((s, i) => s + i.total, 0);
+            if (sumBuku < minBuku) {
+                const kur = minBuku - sumBuku;
+                if (bukuItems.length > 0) {
+                    bukuItems[0].monthAmounts[2] += Math.ceil(kur / 2);
+                    bukuItems[0].monthAmounts[6] += (kur - Math.ceil(kur / 2));
+                    normalizeArkasItem12Months(bukuItems[0]);
+                } else {
+                    const bHalf = Math.ceil(minBuku / 2);
+                    schoolState.arkas.unshift(normalizeArkasItem12Months({
+                        komponenId: 2,
+                        kodeArkas: '05.02.01',
+                        rekening: MASTER_12_KOMPONEN_BOSP[1].defaultRek,
+                        kegiatanRkt: '2. Pengembangan Perpustakaan (Wajib Min. 10%)',
+                        uraian: 'Pengadaan Buku Teks Utama & Buku Bacaan Literasi/Numerasi (SIPLah)',
+                        satuan: 'Paket',
+                        price: bHalf,
+                        monthAmounts: [0,0,bHalf,0,0,0,minBuku - bHalf,0,0,0,0,0]
+                    }));
+                }
+            }
+
+            const grandTotal = schoolState.arkas.reduce((s, i) => s + i.total, 0);
+            let diff = pagu - grandTotal;
+            let target = schoolState.arkas.find(i => i.komponenId === 3) || schoolState.arkas.find(i => ![2, 8, 12].includes(i.komponenId));
+
+            if (diff > 0 && target) {
+                const half1 = Math.floor(diff / 2);
+                target.monthAmounts[2] += half1;
+                target.monthAmounts[8] += (diff - half1);
+                normalizeArkasItem12Months(target);
+            } else if (diff < 0) {
+                let excess = Math.abs(diff);
+                for (let i = schoolState.arkas.length - 1; i >= 0 && excess > 0; i--) {
+                    const it = schoolState.arkas[i];
+                    if (it.komponenId === 2) continue;
+                    for (let m = 11; m >= 0 && excess > 0; m--) {
+                        const cut = Math.min(it.monthAmounts[m], excess);
+                        it.monthAmounts[m] -= cut;
+                        excess -= cut;
+                    }
+                    normalizeArkasItem12Months(it);
+                }
+            }
+
+            persist();
+            renderArkasTable();
+            if (!silent) showSyncToast('Pagu RKAS 12 Bulan Seimbang 100% (Buku ≥ 10%, Sisa Pagu Rp 0)!');
+        }
+
+        renderArkasTable = function() {
+            renderKomponenMiniGrid();
+            const tbody = document.getElementById('arkasTableBody');
+            if (!tbody) return;
+            tbody.innerHTML = '';
+
+            let grandTotal = 0, totalTahap1 = 0, totalTahap2 = 0;
+            let totalBuku = 0, totalHonor = 0, totalSarpras = 0;
+
+            (schoolState.arkas || []).forEach((a, idx) => {
+                normalizeArkasItem12Months(a);
+                grandTotal += a.total;
+                totalTahap1 += a.tahap1;
+                totalTahap2 += a.tahap2;
+
+                if (a.komponenId === 2 || classifyArkasItemCategory(a) === 'buku') totalBuku += a.total;
+                else if (a.komponenId === 12 || classifyArkasItemCategory(a) === 'honor') totalHonor += a.total;
+                else if (a.komponenId === 8 || classifyArkasItemCategory(a) === 'sarpras') totalSarpras += a.total;
+
+                if (activeFilterKomponenId && a.komponenId !== activeFilterKomponenId) return;
+
+                const kompOptions = MASTER_12_KOMPONEN_BOSP.map(k =>
+                    `<option value="${k.id}" ${k.id === a.komponenId ? 'selected' : ''}>${esc(k.nama)}</option>`
+                ).join('');
+
+                const monthsHtml = a.monthAmounts.map((val, mIdx) => {
+                    const bg = mIdx < 6 ? '#eff6ff' : '#f5f3ff';
+                    return `<td contenteditable="true" style="text-align:right; background:${bg}; font-size:11px; white-space:nowrap;" onblur="updateMonthNominal(${idx},${mIdx},this.textContent)">${val ? val.toLocaleString('id-ID') : '0'}</td>`;
+                }).join('');
+
+                const tr = document.createElement('tr');
+                tr.innerHTML = `
+                    <td>
+                        <select onchange="changeArkasItemKomponen(${idx}, this.value)" style="width:100%; font-size:10.5px; font-weight:700; color:#065f46; background:#ecfdf5; border:1px solid #a7f3d0; border-radius:4px; padding:3px 4px; margin-bottom:4px;">
+                            ${kompOptions}
+                        </select>
+                        <div contenteditable="true" onblur="setField('arkas',${idx},'kegiatanRkt',this.innerText)">${esc(a.kegiatanRkt)}</div>
+                    </td>
+                    <td>
+                        <div style="font-size:10.5px; font-weight:700; color:#1e40af;" contenteditable="true" onblur="setField('arkas',${idx},'rekening',this.innerText)">${esc(a.rekening)}</div>
+                        <div style="font-size:10px; color:#64748b; margin-top:3px;">Kode ARKAS: <span contenteditable="true" style="font-weight:700; color:#0f172a;" onblur="setField('arkas',${idx},'kodeArkas',this.innerText)">${esc(a.kodeArkas)}</span></div>
+                    </td>
+                    ${ce('arkas', idx, 'uraian', a.uraian)}
+                    ${ce('arkas', idx, 'satuan', a.satuan)}
+                    ${ce('arkas', idx, 'price', a.price)}
+                    ${monthsHtml}
+                    <td class="nowrap" style="font-weight:600; color:#1d4ed8; text-align:right;">Rp ${a.tahap1.toLocaleString('id-ID')}</td>
+                    <td class="nowrap" style="font-weight:600; color:#6d28d9; text-align:right;">Rp ${a.tahap2.toLocaleString('id-ID')}</td>
+                    <td class="nowrap" style="font-weight:700; color:#0d9488; text-align:right;">Rp ${a.total.toLocaleString('id-ID')}</td>
+                    <td style="text-align:center;"><button type="button" onclick="removeArkas(${idx})" class="btn btn-sm btn-rose">✕</button></td>
+                `;
+                tbody.appendChild(tr);
+            });
+
+            const setTxt = (id, val) => { const el = document.getElementById(id); if (el) el.textContent = val; };
+            setTxt('arkasTahap1Sum', `Rp ${totalTahap1.toLocaleString('id-ID')}`);
+            setTxt('arkasTahap2Sum', `Rp ${totalTahap2.toLocaleString('id-ID')}`);
+            setTxt('arkasTotalSum', `Rp ${grandTotal.toLocaleString('id-ID')}`);
+            setTxt('arkasTotalTop', `Rp ${grandTotal.toLocaleString('id-ID')}`);
+            setTxt('arkasTahap1Top', `Rp ${totalTahap1.toLocaleString('id-ID')}`);
+            setTxt('arkasTahap2Top', `Rp ${totalTahap2.toLocaleString('id-ID')}`);
+            setTxt('arkasTahapTotalTop', `Rp ${grandTotal.toLocaleString('id-ID')}`);
+
+            const pagu = parseFloat(schoolState.paguBosp) || 0;
+            const statusSekolah = schoolState.schoolStatus || detectSchoolStatusFromName(schoolState.schoolName) || 'Negeri';
+            const maxHonorRatio = statusSekolah.toLowerCase() === 'swasta' ? 0.40 : 0.20;
+            const sisa = pagu - grandTotal;
+            const sisaEl = document.getElementById('sisaPaguBosp');
+            if (sisaEl) {
+                sisaEl.textContent = `Sisa: Rp ${sisa.toLocaleString('id-ID')}`;
+                sisaEl.style.color = sisa < 0 ? '#dc2626' : '#059669';
+            }
+
+            const minBukuRp = Math.ceil(pagu * 0.10);
+            const maxHonorRp = Math.floor(pagu * maxHonorRatio);
+            const maxSarprasRp = Math.floor(pagu * 0.20);
+            const pct = (v) => pagu > 0 ? ((v / pagu) * 100).toFixed(1) : '0.0';
+
+            const updateQuotaCard = (boxId, valId, noteId, ok, valRp, noteOk, noteWarn) => {
+                const box = document.getElementById(boxId);
+                if (box) box.className = `quota-pill ${ok ? 'ok' : 'warn'}`;
+                setTxt(valId, `Rp ${valRp.toLocaleString('id-ID')} (${pct(valRp)}%)`);
+                const noteEl = document.getElementById(noteId);
+                if (noteEl) {
+                    noteEl.style.color = ok ? '#065f46' : '#991b1b';
+                    noteEl.textContent = ok ? noteOk : noteWarn;
+                }
+            };
+
+            updateQuotaCard('quotaBukuBox', 'quotaBukuVal', 'quotaBukuNote', pagu > 0 ? totalBuku >= minBukuRp : true, totalBuku,
+                `✓ Terpenuhi (Minimal Rp ${minBukuRp.toLocaleString('id-ID')})`,
+                `⚠ Kurang Rp ${(minBukuRp - totalBuku).toLocaleString('id-ID')} dari batas min. 10%`);
+            setTxt('quotaHonorTarget', `Maks. ${statusSekolah.toLowerCase() === 'swasta' ? '40%' : '20%'} (${statusSekolah})`);
+            updateQuotaCard('quotaHonorBox', 'quotaHonorVal', 'quotaHonorNote', totalHonor <= maxHonorRp, totalHonor,
+                `✓ Aman (Batas maks. Rp ${maxHonorRp.toLocaleString('id-ID')})`,
+                `⚠ Melebihi batas maks. Rp ${maxHonorRp.toLocaleString('id-ID')}`);
+            updateQuotaCard('quotaSarprasBox', 'quotaSarprasVal', 'quotaSarprasNote', totalSarpras <= maxSarprasRp, totalSarpras,
+                `✓ Aman (Batas maks. Rp ${maxSarprasRp.toLocaleString('id-ID')})`,
+                `⚠ Melebihi batas maks. 20% sebesar Rp ${(totalSarpras - maxSarprasRp).toLocaleString('id-ID')}`);
+        };
+
+        addArkasRow = function() {
+            if (!schoolState.arkas) schoolState.arkas = [];
+            const statusSekolah = schoolState.schoolStatus || detectSchoolStatusFromName(schoolState.schoolName) || "Negeri";
+            schoolState.arkas.push(normalizeArkasItem12Months({
+                komponenId: 12,
+                kegiatanRkt: statusSekolah === "Swasta"
+                    ? "12. Pembayaran Honorarium Rutin Bulanan Guru/Tendik Non-ASN (12 Bulan)"
+                    : "12. Pembayaran Honorarium Rutin Bulanan GTK Honor Murni (12 Bulan)",
+                kodeArkas: "07.12.01",
+                rekening: "5.1.02.02.01.0013 - Belanja Jasa Tenaga Pendidikan / Honorarium GTK",
+                uraian: statusSekolah === "Swasta"
+                    ? "Honorarium Rutin Guru/Tendik Non-ASN (1 Orang × 12 Bulan)"
+                    : "Honorarium Rutin GTK Honor Murni (1 Orang × 12 Bulan)",
+                sumberDana: "BOSP Reguler",
+                satuan: "Orang/Bulan",
+                price: 500000,
+                monthAmounts: Array(12).fill(500000)
+            }));
+            persist();
+            renderArkasTable();
+        };
+
         window.onload = async function() {
             try {
                 const savedFont = localStorage.getItem(FONT_SCALE_KEY);
